@@ -10,12 +10,14 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import Colors from '../constants/colors';
 import { useState } from 'react';
 import { FIREBASE_AUTH } from '../FirebaseConfig';
+import { useTranslation } from 'react-i18next';
 
 function RegisterScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
   const auth = FIREBASE_AUTH;
 
   const signUp = async () => {
@@ -43,7 +45,7 @@ function RegisterScreen({ navigation }) {
         <Text style={styles.screenSubText}>Create an account</Text>
       </View>
       <View style={styles.bottomContainer}>
-        <Text style={styles.screenText}>Sign Up</Text>
+        <Text style={styles.screenText}>{t('signup')}</Text>
         <Text>Your Name</Text>
         <TextInput
           value={username}

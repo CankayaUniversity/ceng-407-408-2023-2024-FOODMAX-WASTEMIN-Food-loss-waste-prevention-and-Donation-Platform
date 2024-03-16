@@ -12,11 +12,13 @@ import { useState } from 'react';
 import { FIREBASE_AUTH } from '../FirebaseConfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const auth = FIREBASE_AUTH;
+  const { t } = useTranslation();
 
   const signIn = async () => {
     setLoading(true);
@@ -35,7 +37,7 @@ function LoginScreen({ navigation }) {
     // TODO: add keyboard avoiding view
     <View style={styles.screen}>
       <View style={styles.topContainer}>
-        <Text style={styles.screenText}>Welcome Back!</Text>
+        <Text style={styles.screenText}>{t('welcome')}</Text>
         <View style={styles.subTextContainer}>
           <Text style={styles.screenSubText}>Don't have an account?</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>

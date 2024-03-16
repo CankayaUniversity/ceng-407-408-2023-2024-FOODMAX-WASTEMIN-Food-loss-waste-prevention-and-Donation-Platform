@@ -7,9 +7,10 @@ import { useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from './FirebaseConfig';
 import RegisterScreen from './screens/RegisterScreen';
+import './src/i18n/i18n.config';
+import { useTranslation } from 'react-i18next';
 
 const Stack = createNativeStackNavigator();
-
 const InsideStack = createNativeStackNavigator();
 
 function InsideLayout() {
@@ -23,6 +24,12 @@ function InsideLayout() {
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const { t, i18n } = useTranslation();
+
+  // TODO: Use it later
+  // const changeLanguage = () => {
+  //   i18n.changeLanguage('tr');
+  // };
 
   useEffect(() => {
     onAuthStateChanged(FIREBASE_AUTH, (user) => {
