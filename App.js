@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from './constants/colors';
 import { Platform } from 'react-native';
+import './src/i18n/i18n.config';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
