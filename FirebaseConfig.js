@@ -3,8 +3,8 @@ import { getAuth } from 'firebase/auth';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: `${process.env.REACT_APP_API_KEY}`,
-  authDomain: `${process.env.REACT_APP_AUTH_DOMAIN}`,
+  apiKey: `${process.env.EXPO_PUBLIC_API_KEY}`,
+  authDomain: `${process.env.EXPO_PUBLIC_AUTH_DOMAIN}`,
   projectId: 'nourish-me-8e6b6',
   storageBucket: 'nourish-me-8e6b6.appspot.com',
   messagingSenderId: '48697384631',
