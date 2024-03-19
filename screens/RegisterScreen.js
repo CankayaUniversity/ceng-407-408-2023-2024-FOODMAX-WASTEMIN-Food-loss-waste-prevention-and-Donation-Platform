@@ -11,12 +11,7 @@ import Colors from '../constants/colors';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../FirebaseConfig';
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  Timestamp,
-} from 'firebase/firestore';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
 
 function RegisterScreen({ navigation }) {
   const [username, setUsername] = useState('');
@@ -43,6 +38,7 @@ function RegisterScreen({ navigation }) {
         fullName: username,
         email: email,
         password: password,
+        role: 'regular',
       });
 
       alert('Successfully registered 🎊!');
