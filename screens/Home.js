@@ -7,6 +7,10 @@ function Home({ navigation }) {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Button
+        onPress={() => navigation.navigate('Food Post')}
+        title='Open Food Post'
+      />
+      <Button
         onPress={() => navigation.navigate('Details')}
         title='Open Details'
       />

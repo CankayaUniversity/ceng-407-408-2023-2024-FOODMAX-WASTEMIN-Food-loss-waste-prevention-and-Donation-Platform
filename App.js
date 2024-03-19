@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Colors from './constants/colors';
 import { Platform } from 'react-native';
 import './src/i18n/i18n.config';
+import FoodPost from './screens/FoodPost';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -40,6 +41,7 @@ function InsideStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: true }}>
       <Stack.Screen name='Home Screen' component={HomeScreen} />
+      <Stack.Screen name='Food Post' component={FoodPost} />
       <Stack.Screen name='Details' component={DetailsScreen} />
     </Stack.Navigator>
   );
