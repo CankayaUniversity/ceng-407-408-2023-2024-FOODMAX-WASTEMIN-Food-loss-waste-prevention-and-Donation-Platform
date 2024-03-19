@@ -9,8 +9,14 @@ import {
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import Colors from '../constants/colors';
 import { useState } from 'react';
-import { FIREBASE_AUTH } from '../FirebaseConfig';
 import { useTranslation } from 'react-i18next';
+import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../FirebaseConfig';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  Timestamp,
+} from 'firebase/firestore';
 
 function RegisterScreen({ navigation }) {
   const [username, setUsername] = useState('');
@@ -19,17 +25,28 @@ function RegisterScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
   const auth = FIREBASE_AUTH;
+  const firestore = FIREBASE_FIRESTORE;
 
   const signUp = async () => {
     setLoading(true);
     try {
-      const response = await createUserWithEmailAndPassword(
+      const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
-      alert('Check your emails!');
-      console.log(response);
+      const uid = userCredential.user.uid;
+
+      await addDoc(collection(firestore, 'users'), {
+        uid: uid,
+        createdAt: Timestamp.fromDate(new Date()),
+        fullName: username,
+        email: email,
+        password: password,
+      });
+
+      alert('Successfully registered 🎊!');
+      console.log(userCredential);
     } catch (error) {
       console.log(error);
       alert('Sign up failed: ' + error.message);
