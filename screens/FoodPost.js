@@ -77,6 +77,7 @@ function FoodPost({ navigation }) {
       ); // Use merge option to update existing document
 
       alert('Food Post created successfully!');
+      navigation.navigate('HomeScreen');
     } catch (error) {
       console.error('Error adding document: ', error);
       alert('Failed to create document. Please try again.');
