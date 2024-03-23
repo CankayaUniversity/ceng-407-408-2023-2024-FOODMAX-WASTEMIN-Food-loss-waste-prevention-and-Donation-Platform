@@ -40,8 +40,16 @@ function AuthStack() {
 function InsideStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: true }}>
-      <Stack.Screen name='Home Screen' component={HomeScreen} />
-      <Stack.Screen name='Food Post' component={FoodPost} />
+      <Stack.Screen
+        name='HomeScreen'
+        component={HomeScreen}
+        options={{ title: 'Home' }}
+      />
+      <Stack.Screen
+        name='FoodPost'
+        component={FoodPost}
+        options={{ title: 'Foods' }}
+      />
       <Stack.Screen name='Details' component={DetailsScreen} />
     </Stack.Navigator>
   );
