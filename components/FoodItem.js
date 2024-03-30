@@ -1,13 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
+import { getDownloadURL, ref } from 'firebase/storage'; 
+import { FIREBASE_STORAGE } from '../FirebaseConfig'; // Assuming FIREBASE_STORAGE contains your Firebase Storage instance
 
 const FoodItem = ({ data }) => {
-  const imageSource = data.PostPhotos.length > 0 ? data.PostPhotos[0] : null;
+  const [imageURL, setImageURL] = useState(null);
+
+  useEffect(() => {
+    if (data.PostPhotos) {
+      let imagePath = data.PostPhotos;
+      if (Array.isArray(data.PostPhotos)) {
+        // If data.PostPhotos is an array, use the first element
+        imagePath = data.PostPhotos[0];
+      }
+      const imageRef = ref(FIREBASE_STORAGE, imagePath);
+      getDownloadURL(imageRef)
+        .then((url) => {
+          setImageURL(url);
+        })
+        .catch((error) => {
+          console.error('Error getting download URL:', error);
+          setImageURL(null); // Reset imageURL to null if download fails
+        });
+    }
+  }, [data.PostPhotos]);
+  
+  
 
   return (
     <View style={styles.container}>
-      {imageSource && (
-        <Image source={{ uri: imageSource }} style={styles.image} />
+      {imageURL && (
+        <Image source={{ uri: imageURL }} style={styles.image} />
       )}
       <View style={styles.textContainer}>
         <Text style={styles.title}>{data.PostTitle}</Text>
@@ -23,14 +46,13 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    padding: 10,
   },
   image: {
-    width: 50,
-    height: 50,
-    marginRight: 16,
+    width: 100,
+    height: 100,
+    resizeMode: 'cover',
+    marginRight: 10,
   },
   textContainer: {
     flex: 1,
@@ -41,15 +63,14 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 16,
-    marginTop: 8,
   },
   price: {
     fontSize: 16,
-    marginTop: 8,
+    marginTop: 5,
   },
   quantity: {
     fontSize: 16,
-    marginTop: 8,
+    marginTop: 5,
   },
 });
 

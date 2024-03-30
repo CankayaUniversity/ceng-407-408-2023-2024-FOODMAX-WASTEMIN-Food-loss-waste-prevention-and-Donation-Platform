@@ -13,10 +13,12 @@ import { Picker } from '@react-native-picker/picker';
 import Colors from '../constants/colors';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../FirebaseConfig';
+import { FIREBASE_AUTH, FIREBASE_FIRESTORE, FIREBASE_STORAGE} from '../FirebaseConfig';
 import { collection, addDoc, doc, setDoc, Timestamp } from 'firebase/firestore';
 
 import * as ImagePicker from 'expo-image-picker';
+import storage from '@react-native-firebase/storage';
+import { getStorage, ref ,uploadBytes , getDownloadURL} from 'firebase/storage'; 
 
 function FoodPost({ navigation }) {
   const [FoodPostTitle, setFoodPostTitle] = useState('');
@@ -34,6 +36,8 @@ function FoodPost({ navigation }) {
   const auth = FIREBASE_AUTH;
   const firestore = FIREBASE_FIRESTORE;
 
+
+  
   const foodTypes = ['Produce', 'Pastries', 'Meals', 'Packaged Food'];
 
   const createFoodPost = async () => {
@@ -113,41 +117,63 @@ function FoodPost({ navigation }) {
     })();
   }, []);
 
-  const pickImage = async () => {
+  const selectImage = async () => {
     if (!ImagePicker.launchImageLibraryAsync) {
       console.error('ImagePicker.launchImageLibraryAsync is not available');
       return;
     }
-    if (FoodPostPhotos.length >= 5) {
-      alert('You can only upload up to 5 photos.');
+    
+    //console.log('Now in selected images');
+    // Request permissions to access the media library
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      console.error('Permission to access media library was denied');
       return;
     }
-
+    
+  
+    // Launch the image picker
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3],
       quality: 1,
+      multiple: false,
     });
 
-    if (result.cancelled) {
-      // User cancelled image selection
-      return;
-    }
+    if (!result.cancelled) {
+      const selectedImages = result.assets;
+      const newPhotos = [...FoodPostPhotos];
+  
+      selectedImages.forEach(async (image) => {
 
-    if (!result.assets[0].uri) {
-      console.error('Image URI is undefined');
-      return;
-    }
-
-    if (FoodPostPhotos.length + 1 <= 5) {
-      // Add the selected photo to the array
-      setFoodPostPhotos((prevPhotos) => [...prevPhotos, result.assets[0].uri]);
-    } else {
-      alert('You can only upload up to 5 photos.');
+        if (FoodPostPhotos.length + 1 > 5) {
+          alert('You can only select up to 5 images.');
+          return;
+        }
+    
+        const fileName = image.uri.substring(image.uri.lastIndexOf('/') + 1);
+        const storageRef = ref(FIREBASE_STORAGE, 'images/' + fileName);
+  
+        const response = await fetch(image.uri);
+        const blob = await response.blob();
+  
+        uploadBytes(storageRef, blob)
+          .then((snapshot) => {
+            console.log('File uploaded successfully');
+            const storagePath = storageRef.fullPath;
+            newPhotos.push(storagePath);
+            setFoodPostPhotos(newPhotos);
+          })
+          .catch((error) => {
+            console.error('Error uploading file:', error);
+            // Handle errors
+          });
+      });
     }
   };
-
+    
+  
+  
   return (
     <ScrollView contentContainerStyle={styles.scrollView}>
       <View style={styles.screen}>
@@ -180,14 +206,7 @@ function FoodPost({ navigation }) {
               }
             }}
           ></TextInput>
-          <Button title='Pick an image from camera roll' onPress={pickImage} />
-          {FoodPostPhotos.map((photo, index) => (
-            <Image
-              key={index}
-              source={{ uri: photo }}
-              style={{ width: 200, height: 200 }}
-            />
-          ))}
+          <Button title='Pick an image from camera roll' onPress={selectImage} />
 
           <TextInput
             value={FoodPostQuantity}
