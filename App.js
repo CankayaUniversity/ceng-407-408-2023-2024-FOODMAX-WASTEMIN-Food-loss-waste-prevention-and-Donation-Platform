@@ -16,6 +16,7 @@ import Colors from './constants/colors';
 import { Platform } from 'react-native';
 import './src/i18n/i18n.config';
 import FoodPost from './screens/FoodPost';
+import axios from 'axios';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -58,6 +59,23 @@ function InsideStack() {
 export default function App() {
   const [user, setUser] = useState(null);
   const { t, i18n } = useTranslation();
+  const [data, setData] = useState('');
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/data');
+
+      setData(response.data.message);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  console.log(data);
 
   // TODO: Use it later
   // const changeLanguage = () => {
