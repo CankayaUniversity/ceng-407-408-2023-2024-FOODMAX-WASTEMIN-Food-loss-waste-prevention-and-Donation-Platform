@@ -1,37 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, ScrollView, Text, ActivityIndicator, Switch, StyleSheet } from 'react-native';
+import { View, TextInput, Button, ScrollView, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { doc, getDoc, updateDoc } from 'firebase/firestore'; 
 import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes } from 'firebase/storage';
 import { useTranslation } from 'react-i18next';
 import Colors from '../constants/colors';
+import { Picker } from '@react-native-picker/picker';
+
 import {
-  FIREBASE_AUTH,
   FIREBASE_FIRESTORE,
   FIREBASE_STORAGE,
 } from '../FirebaseConfig';
-
 
 function FoodPostEdit({ route, navigation }) {
   const { t } = useTranslation();
   const [foodPost, setFoodPost] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { postId } = route.params; // Assuming postId is passed as a route parameter
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [expiryDate, setExpiryDate] = useState(new Date());
+  const { postId } = route.params; 
+  const foodTypes = ['Produce', 'Pastries', 'Meals', 'Packaged Food'];
+  const [selectedFoodType, setSelectedFoodType] = useState('');
+  const [foodPostAllergyWarning, setFoodPostAllergyWarning] = useState([]);
+
 
   useEffect(() => {
-    // Fetch the existing data of the food post to be edited
     const fetchFoodPost = async () => {
       try {
         const docRef = doc(FIREBASE_FIRESTORE, 'FoodPost', postId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const postData = docSnap.data();
-          // Parse PostExipry field to Date object if it exists
+          setFoodPost(postData);
+          setSelectedFoodType(postData.PostFoodType || '');
+          setFoodPostAllergyWarning(postData.PostAllergyWarning || []);
           if (postData.PostExipry) {
             postData.PostExipry = postData.PostExipry.toDate(); // Assuming it's a Firestore Timestamp
           }
           setFoodPost(postData);
+          setExpiryDate(postData.PostExipry || new Date());
         } else {
           console.log('No such document!');
         }
@@ -44,13 +52,12 @@ function FoodPostEdit({ route, navigation }) {
   }, [postId]);
 
   const handleEdit = async () => {
-    // Update the corresponding document in Firebase with the edited data
     try {
       setLoading(true);
       const docRef = doc(FIREBASE_FIRESTORE, 'FoodPost', postId);
       await updateDoc(docRef, foodPost);
       console.log('Document successfully updated!');
-      navigation.navigate('HomeScreen'); // Navigate back to home screen after editing
+      navigation.navigate('HomeScreen');
     } catch (error) {
       console.error('Error updating document:', error);
     } finally {
@@ -58,17 +65,37 @@ function FoodPostEdit({ route, navigation }) {
     }
   };
 
+  const toggleAllergyWarning = (allergy) => {
+    const updatedAllergyWarnings = foodPostAllergyWarning.includes(allergy)
+      ? foodPostAllergyWarning.filter((item) => item !== allergy)
+      : [...foodPostAllergyWarning, allergy];
+    setFoodPostAllergyWarning(updatedAllergyWarnings);
+    handleChange('PostAllergyWarning', updatedAllergyWarnings);
+  };
+
   const handleChange = (field, value) => {
-    if (field === 'PostExipry') {
-      // If the field is PostExipry, ensure value is a Date object
-      value = new Date(value);
-    }
+    console.log('Updating field:', field, 'with value:', value);
     setFoodPost(prevState => ({
       ...prevState,
       [field]: value
     }));
+    if (field === 'PostFoodType') {
+      setSelectedFoodType(value); // Update selectedFoodType state
+    }
   };
   
+
+  const selectExpiryDate = () => {
+    setShowDatePicker(true);
+  };
+
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setExpiryDate(selectedDate);
+      handleChange('PostExipry', selectedDate);
+    }
+  };
 
   const selectImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -102,6 +129,7 @@ function FoodPostEdit({ route, navigation }) {
         });
     }
   };
+
   return (
     <ScrollView contentContainerStyle={styles.scrollView}>
       <View style={styles.screen}>
@@ -110,38 +138,120 @@ function FoodPostEdit({ route, navigation }) {
         </View>
         <View style={styles.bottomContainer}>
           <TextInput
-          autoCapitalize='none'
-          style={styles.input}
-          value={foodPost?.PostTitle || ''}
-          placeholder="Title"
-          onChangeText={(text) => handleChange('PostTitle', text)}
-
-          ></TextInput>
+            autoCapitalize='none'
+            style={styles.input}
+            value={foodPost?.PostTitle || ''}
+            placeholder="Title"
+            onChangeText={(text) => handleChange('PostTitle', text)}
+          />
           <TextInput
-             style={styles.input}
-             value={foodPost?.PostDescription || ''}
-             placeholder="Description"
-             onChangeText={(text) => handleChange('PostDescription', text)}
-   
-          ></TextInput>
+            style={styles.input}
+            value={foodPost?.PostDescription || ''}
+            placeholder="Description"
+            onChangeText={(text) => handleChange('PostDescription', text)}
+          />
           <Button title="Select Image" onPress={selectImage} />
 
-
-        <TextInput
-          style={styles.input}
-          value={foodPost?.PostQuantity || ''}
-          placeholder="Quantity"
-          onChangeText={(text) => handleChange('PostQuantity', text)}
-        />
-        <TextInput
-          style={styles.input}
-          value={foodPost?.PostPrice || ''}
-          placeholder="Price"
-          onChangeText={(text) => handleChange('PostPrice', text)}
-        />
-
+          <TextInput
+            style={styles.input}
+            value={foodPost?.PostQuantity || ''}
+            placeholder="Quantity"
+            onChangeText={(text) => handleChange('PostQuantity', text)}
+          />
+          <TextInput
+            style={styles.input}
+            value={foodPost?.PostPrice || ''}
+            placeholder="Price"
+            onChangeText={(text) => handleChange('PostPrice', text)}
+          />
           <Text>Food Type</Text>
+          <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={selectedFoodType}
+            style={{ height: 50, width: '100%' }}
+            onValueChange={(itemValue, itemIndex) =>
+              handleChange('PostFoodType', itemValue) // Call handleChange function
+            }
+          >
+            <Picker.Item label='Select Food Type' value='' />
+            {foodTypes.map((type, index) => (
+              <Picker.Item key={index} label={type} value={type} />
+            ))}
+          </Picker>
+
+          </View>
+
+          <Text>Allergy Warnings</Text>
+          <View style={styles.allergyButtonContainer}>
+            <Button
+              onPress={() => toggleAllergyWarning('Gluten-Free')}
+              title='Gluten-Free'
+              color={
+                foodPostAllergyWarning.includes('Gluten-Free')
+                  ? 'green'
+                  : 'gray'
+              }
+              style={[
+                styles.allergyButton,
+                {
+                  backgroundColor: foodPostAllergyWarning.includes(
+                    'Gluten-Free'
+                  )
+                    ? 'lightgreen'
+                    : 'lightgray',
+                },
+              ]}
+            />
+            <Button
+              onPress={() => toggleAllergyWarning('Dairy-Free')}
+              title='Dairy-Free'
+              color={
+                foodPostAllergyWarning.includes('Dairy-Free') ? 'green' : 'gray'
+              }
+              style={[
+                styles.allergyButton,
+                {
+                  backgroundColor: foodPostAllergyWarning.includes('Dairy-Free')
+                    ? 'lightgreen'
+                    : 'lightgray',
+                },
+              ]}
+            />
+            <Button
+              onPress={() => toggleAllergyWarning('Vegan')}
+              title='Vegan'
+              color={
+                foodPostAllergyWarning.includes('Vegan') ? 'green' : 'gray'
+              }
+              style={[
+                styles.allergyButton,
+                {
+                  backgroundColor: foodPostAllergyWarning.includes('Vegan')
+                    ? 'lightgreen'
+                    : 'lightgray',
+                },
+              ]}
+            />
+            <Button
+              onPress={() => toggleAllergyWarning('Vegetarian')}
+              title='Vegetarian'
+              color={
+                foodPostAllergyWarning.includes('Vegetarian') ? 'green' : 'gray'
+              }
+              style={[
+                styles.allergyButton,
+                {
+                  backgroundColor: foodPostAllergyWarning.includes('Vegetarian')
+                    ? 'lightgreen'
+                    : 'lightgray',
+                },
+              ]}
+            />
+          </View>
+
           
+          <Button title="Select Expiry Date" onPress={selectExpiryDate} />
+
           {loading ? (
             <ActivityIndicator size='large' color='#0000ff' />
           ) : (
@@ -150,8 +260,17 @@ function FoodPostEdit({ route, navigation }) {
               <Button
                 title='Back'
                 onPress={() => navigation.navigate('HomeScreen')}
-              ></Button>
+              />
             </>
+          )}
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={expiryDate}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
+            />
           )}
         </View>
       </View>
@@ -160,12 +279,12 @@ function FoodPostEdit({ route, navigation }) {
 }
 
 export default FoodPostEdit;
+
 const styles = StyleSheet.create({
   scrollView: {
     flexGrow: 1,
     justifyContent: 'center',
   },
-
   allergyButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -190,15 +309,6 @@ const styles = StyleSheet.create({
     color: Colors.navy,
     fontWeight: 'bold',
   },
-  screenSubText: {
-    fontSize: 14,
-    color: Colors.gray,
-  },
-  topContainer: {
-    flex: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   bottomContainer: {
     flex: 5,
     width: '100%',
@@ -208,5 +318,14 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
     paddingHorizontal: 24,
     elevation: 4,
+  },
+  input: {
+    marginBottom: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    backgroundColor: '#fff',
   },
 });

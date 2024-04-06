@@ -22,7 +22,7 @@ const FoodItem = ({ data , navigation}) => {
         })
         .catch((error) => {
           console.error('Error getting download URL:', error);
-          setImageURL(null); // Reset imageURL to null if download fails
+          setImageURL(null);
         });
     }
   }, [data.PostPhotos]);
