@@ -15,6 +15,7 @@ function Home({ navigation }) {
       );
       const fetchedData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
+        providerId: doc.data().PostFoodProvider,
         ...doc.data(),
       }));
       setFoodItems([...fetchedData]); // Update the state with the newly fetched data
@@ -35,7 +36,7 @@ function Home({ navigation }) {
     }, [])
   );
 
-  const renderItem = ({ item }) => <FoodItem data={item} />;
+  const renderItem = ({ item }) => <FoodItem data={item} navigation={navigation} />;
 
   return (
     <View style={{ flex: 1 }}>

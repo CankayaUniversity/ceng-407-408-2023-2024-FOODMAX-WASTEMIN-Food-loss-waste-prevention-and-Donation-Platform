@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, Button } from 'react-native';
 import { getDownloadURL, ref } from 'firebase/storage'; 
-import { FIREBASE_STORAGE } from '../FirebaseConfig'; // Assuming FIREBASE_STORAGE contains your Firebase Storage instance
+import { FIREBASE_STORAGE,FIREBASE_AUTH } from '../FirebaseConfig'; // Assuming FIREBASE_STORAGE contains your Firebase Storage instance
 
-const FoodItem = ({ data }) => {
+const auth = FIREBASE_AUTH;
+
+const FoodItem = ({ data , navigation}) => {
   const [imageURL, setImageURL] = useState(null);
 
   useEffect(() => {
@@ -25,7 +27,11 @@ const FoodItem = ({ data }) => {
     }
   }, [data.PostPhotos]);
   
-  
+  const currentUser = auth.currentUser;
+
+  const isCurrentUserMatched = () => {
+    return currentUser && data.PostFoodProvider === currentUser.uid;
+  };
 
   return (
     <View style={styles.container}>
@@ -37,6 +43,12 @@ const FoodItem = ({ data }) => {
         <Text style={styles.description}>{data.PostDescription}</Text>
         <Text style={styles.price}>Price: ${data.PostPrice}</Text>
         <Text style={styles.quantity}>Quantity: {data.PostQuantity}</Text>
+        {isCurrentUserMatched() && (
+          <Button
+            onPress={() => navigation.navigate('FoodPostEdit', { postId: data.id })}
+            title='Edit Food Post'
+          />
+        )}
       </View>
     </View>
   );

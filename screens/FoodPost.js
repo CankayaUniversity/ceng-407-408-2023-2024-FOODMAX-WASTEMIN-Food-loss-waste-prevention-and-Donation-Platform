@@ -178,7 +178,7 @@ function FoodPost({ navigation }) {
           <Text style={styles.screenText}>{t('Create Food Post')}</Text>
         </View>
         <View style={styles.bottomContainer}>
-          <Text>Title for Food Post</Text>
+          
           <TextInput
             value={FoodPostTitle}
             placeholder='Title'
