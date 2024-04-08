@@ -13,10 +13,12 @@ import DiscoverScreen from './screens/DiscoverScreen';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from './constants/colors';
-import { Platform } from 'react-native';
+import { Platform, View, Image, Text } from 'react-native';
 import './src/i18n/i18n.config';
 import FoodPost from './screens/FoodPost';
 import axios from 'axios';
+import AppIntroSlider from 'react-native-app-intro-slider';
+import { SIZES } from './constants/sizes';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -56,10 +58,43 @@ function InsideStack() {
   );
 }
 
+const slides = [
+  {
+    id: 1,
+    title: 'Welcome to NourishMe ✨',
+    description:
+      'Help us combat food waste and hunger. 🌍 Join our mission to connect surplus food with those in need.',
+    image: require('./assets/intro1.jpg'),
+  },
+  {
+    id: 2,
+    title: 'Reduce. Share. Nourish.',
+    description:
+      "Discover local donations, volunteer, or contribute your surplus. Let's make a positive impact together!",
+    image: require('./assets/intro2.jpg'),
+  },
+  {
+    id: 3,
+    title: "Let's get started 🚀",
+    description:
+      'Ready to take action? Explore local donation opportunities, volunteer, or share your surplus. Together, we can create meaningful change!',
+    image: require('./assets/intro3.jpg'),
+  },
+];
+
 export default function App() {
   const [user, setUser] = useState(null);
   const { t, i18n } = useTranslation();
   const [data, setData] = useState('');
+  const [showIntro, setShowIntro] = useState(true);
+
+  const buttonLabel = (label) => {
+    return (
+      <View>
+        <Text>{label}</Text>
+      </View>
+    );
+  };
 
   useEffect(() => {
     fetchData();
@@ -85,11 +120,42 @@ export default function App() {
   useEffect(() => {
     onAuthStateChanged(FIREBASE_AUTH, (user) => {
       setUser(user);
+      setShowIntro(!user);
     });
   }, []);
 
   return (
     <NavigationContainer>
+      {showIntro && (
+        <AppIntroSlider
+          data={slides}
+          renderItem={({ item }) => {
+            return (
+              <View>
+                <Image
+                  source={item.image}
+                  style={{
+                    width: SIZES.width,
+                  }}
+                  resizeMode='contain'
+                />
+                <Text>{item.title}</Text>
+                <Text>{item.description}</Text>
+              </View>
+            );
+          }}
+          activeDotStyle={{ backgroundColor: Colors.green }}
+          renderNextButton={() => buttonLabel('Next')}
+          renderPrevButton={() => buttonLabel('Back')}
+          renderSkipButton={() => buttonLabel('Skip')}
+          renderDoneButton={() => buttonLabel('Done')}
+          showSkipButton
+          showPrevButton
+          onDone={() => {
+            setShowIntro(false);
+          }}
+        />
+      )}
       {user ? (
         <Tab.Navigator
           screenOptions={({ route }) => ({
@@ -133,7 +199,7 @@ export default function App() {
           />
         </Tab.Navigator>
       ) : (
-        <AuthStack />
+        !showIntro && <AuthStack />
       )}
     </NavigationContainer>
   );
