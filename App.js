@@ -13,12 +13,13 @@ import DiscoverScreen from './screens/DiscoverScreen';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from './constants/colors';
-import { Platform, View, Image, Text } from 'react-native';
+import { Platform, View, Image, Text, StyleSheet } from 'react-native';
 import './src/i18n/i18n.config';
 import FoodPost from './screens/FoodPost';
 import axios from 'axios';
 import AppIntroSlider from 'react-native-app-intro-slider';
 import { SIZES } from './constants/sizes';
+import Svg, { Path } from 'react-native-svg';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -91,7 +92,7 @@ export default function App() {
   const buttonLabel = (label) => {
     return (
       <View>
-        <Text>{label}</Text>
+        <Text style={styles.button}>{label}</Text>
       </View>
     );
   };
@@ -131,16 +132,21 @@ export default function App() {
           data={slides}
           renderItem={({ item }) => {
             return (
-              <View>
-                <Image
-                  source={item.image}
-                  style={{
-                    width: SIZES.width,
-                  }}
-                  resizeMode='contain'
-                />
-                <Text>{item.title}</Text>
-                <Text>{item.description}</Text>
+              <View style={styles.container}>
+                <View style={styles.imageContainer}>
+                  <Image source={item.image} style={styles.image} />
+                  <Svg height={100} viewBox='0 0 1440 320' style={styles.wave}>
+                    <Path
+                      fill='#fff'
+                      fill-opacity='1'
+                      d='M0,160L60,133.3C120,107,240,53,360,32C480,11,600,21,720,74.7C840,128,960,224,1080,240C1200,256,1320,192,1380,160L1440,128L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z'
+                    ></Path>
+                  </Svg>
+                </View>
+                <View style={styles.textContainer}>
+                  <Text style={styles.title}>{item.title}</Text>
+                  <Text style={styles.description}>{item.description}</Text>
+                </View>
               </View>
             );
           }}
@@ -204,3 +210,46 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  imageContainer: {
+    flex: 3,
+  },
+  image: {
+    flex: 1,
+    width: SIZES.width,
+    position: 'relative',
+  },
+  wave: {
+    width: SIZES.width,
+    position: 'absolute',
+    bottom: -7,
+  },
+  textContainer: {
+    flex: 2,
+    padding: 36,
+    alignItems: 'center',
+  },
+  title: {
+    width: '80%',
+    color: Colors.green,
+    fontSize: 36,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  description: {
+    color: Colors.navy,
+    fontSize: 16,
+    lineHeight: 20,
+    textAlign: 'center',
+  },
+  button: {
+    padding: 10,
+    fontSize: 16,
+    color: Colors.navy,
+  },
+});

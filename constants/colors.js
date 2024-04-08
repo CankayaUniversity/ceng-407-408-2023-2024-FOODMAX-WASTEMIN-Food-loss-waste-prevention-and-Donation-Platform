@@ -11,6 +11,9 @@ const Colors = {
 
   // gray
   gray: '#7E7E7E',
+
+  // white
+  white: '#FFFFFF',
 };
 
 export default Colors;
