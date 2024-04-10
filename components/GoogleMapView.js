@@ -1,6 +1,6 @@
 import { View, StyleSheet, Dimensions } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { UserLocationContext } from '../src/context/UserLocationContext';
 
 export default function GoogleMapView() {
@@ -26,7 +26,9 @@ export default function GoogleMapView() {
           provider={PROVIDER_GOOGLE}
           showsUserLocation={true}
           region={mapRegion}
-        />
+        >
+          <Marker title='You' coordinate={mapRegion} />
+        </MapView>
       )}
     </View>
   );
