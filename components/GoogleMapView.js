@@ -1,22 +1,21 @@
 import { View, StyleSheet, Dimensions } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
-import * as Location from 'expo-location';
+import { UserLocationContext } from '../src/context/UserLocationContext';
 
 export default function GoogleMapView() {
-  const [location, setLocation] = useState(null);
+  const { location, setLocation } = useContext(UserLocationContext);
+  const [mapRegion, setMapRegion] = useState();
 
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Permission to access location was denied');
-        return;
-      }
-
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation);
-    })();
+    if (location) {
+      setMapRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.0322,
+        longitudeDelta: 0.0421,
+      });
+    }
   }, []);
 
   return (
@@ -26,12 +25,7 @@ export default function GoogleMapView() {
           style={styles.mapView}
           provider={PROVIDER_GOOGLE}
           showsUserLocation={true}
-          region={{
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
+          region={mapRegion}
         />
       )}
     </View>

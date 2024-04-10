@@ -20,6 +20,8 @@ import axios from 'axios';
 import AppIntroSlider from 'react-native-app-intro-slider';
 import { SIZES } from './constants/sizes';
 import Svg, { Path } from 'react-native-svg';
+import { UserLocationContext } from './src/context/UserLocationContext';
+import * as Location from 'expo-location';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -88,6 +90,7 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const [data, setData] = useState('');
   const [showIntro, setShowIntro] = useState(true);
+  const [location, setLocation] = useState(null);
 
   const buttonLabel = (label) => {
     return (
@@ -99,6 +102,18 @@ export default function App() {
 
   useEffect(() => {
     fetchData();
+
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permission to access location was denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+      console.log('hellos', location);
+    })();
   }, []);
 
   const fetchData = async () => {
@@ -126,88 +141,94 @@ export default function App() {
   }, []);
 
   return (
-    <NavigationContainer>
-      {showIntro && (
-        <AppIntroSlider
-          data={slides}
-          renderItem={({ item }) => {
-            return (
-              <View style={styles.container}>
-                <View style={styles.imageContainer}>
-                  <Image source={item.image} style={styles.image} />
-                  <Svg height={100} viewBox='0 0 1440 320' style={styles.wave}>
-                    <Path
-                      fill='#fff'
-                      fill-opacity='1'
-                      d='M0,160L60,133.3C120,107,240,53,360,32C480,11,600,21,720,74.7C840,128,960,224,1080,240C1200,256,1320,192,1380,160L1440,128L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z'
-                    ></Path>
-                  </Svg>
+    <UserLocationContext.Provider value={{ location, setLocation }}>
+      <NavigationContainer>
+        {showIntro && (
+          <AppIntroSlider
+            data={slides}
+            renderItem={({ item }) => {
+              return (
+                <View style={styles.container}>
+                  <View style={styles.imageContainer}>
+                    <Image source={item.image} style={styles.image} />
+                    <Svg
+                      height={100}
+                      viewBox='0 0 1440 320'
+                      style={styles.wave}
+                    >
+                      <Path
+                        fill='#fff'
+                        fill-opacity='1'
+                        d='M0,160L60,133.3C120,107,240,53,360,32C480,11,600,21,720,74.7C840,128,960,224,1080,240C1200,256,1320,192,1380,160L1440,128L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z'
+                      ></Path>
+                    </Svg>
+                  </View>
+                  <View style={styles.textContainer}>
+                    <Text style={styles.title}>{item.title}</Text>
+                    <Text style={styles.description}>{item.description}</Text>
+                  </View>
                 </View>
-                <View style={styles.textContainer}>
-                  <Text style={styles.title}>{item.title}</Text>
-                  <Text style={styles.description}>{item.description}</Text>
-                </View>
-              </View>
-            );
-          }}
-          activeDotStyle={{ backgroundColor: Colors.green }}
-          renderNextButton={() => buttonLabel('Next')}
-          renderPrevButton={() => buttonLabel('Back')}
-          renderSkipButton={() => buttonLabel('Skip')}
-          renderDoneButton={() => buttonLabel('Done')}
-          showSkipButton
-          showPrevButton
-          onDone={() => {
-            setShowIntro(false);
-          }}
-        />
-      )}
-      {user ? (
-        <Tab.Navigator
-          screenOptions={({ route }) => ({
-            headerShown: false,
-            tabBarIcon: ({ focused, color, size }) => {
-              let iconName;
-
-              if (route.name === 'Home') {
-                iconName = focused ? 'home' : 'home-outline';
-              } else if (route.name === 'Settings') {
-                iconName = focused ? 'settings' : 'settings-outline';
-              } else if (route.name === 'Discover') {
-                iconName = focused ? 'search' : 'search-outline';
-              }
-
-              // You can return any component here that you want as the icon
-              return <Ionicons name={iconName} size={size} color={color} />;
-            },
-            tabBarActiveTintColor: Colors.green,
-            tabBarInactiveTintColor: Colors.gray,
-            tabBarLabelStyle: {
-              fontSize: 10,
-              paddingBottom: Platform.OS === 'ios' ? 0 : 10,
-            },
-            tabBarStyle: {
-              padding: 10,
-              height: Platform.OS === 'ios' ? 80 : 60,
-            },
-          })}
-        >
-          <Tab.Screen name='Home' component={InsideStack} />
-          <Tab.Screen
-            name='Discover'
-            component={DiscoverScreen}
-            options={{ headerShown: true }}
+              );
+            }}
+            activeDotStyle={{ backgroundColor: Colors.green }}
+            renderNextButton={() => buttonLabel('Next')}
+            renderPrevButton={() => buttonLabel('Back')}
+            renderSkipButton={() => buttonLabel('Skip')}
+            renderDoneButton={() => buttonLabel('Done')}
+            showSkipButton
+            showPrevButton
+            onDone={() => {
+              setShowIntro(false);
+            }}
           />
-          <Tab.Screen
-            name='Settings'
-            component={SettingsScreen}
-            options={{ headerShown: true }}
-          />
-        </Tab.Navigator>
-      ) : (
-        !showIntro && <AuthStack />
-      )}
-    </NavigationContainer>
+        )}
+        {user ? (
+          <Tab.Navigator
+            screenOptions={({ route }) => ({
+              headerShown: false,
+              tabBarIcon: ({ focused, color, size }) => {
+                let iconName;
+
+                if (route.name === 'Home') {
+                  iconName = focused ? 'home' : 'home-outline';
+                } else if (route.name === 'Settings') {
+                  iconName = focused ? 'settings' : 'settings-outline';
+                } else if (route.name === 'Discover') {
+                  iconName = focused ? 'search' : 'search-outline';
+                }
+
+                // You can return any component here that you want as the icon
+                return <Ionicons name={iconName} size={size} color={color} />;
+              },
+              tabBarActiveTintColor: Colors.green,
+              tabBarInactiveTintColor: Colors.gray,
+              tabBarLabelStyle: {
+                fontSize: 10,
+                paddingBottom: Platform.OS === 'ios' ? 0 : 10,
+              },
+              tabBarStyle: {
+                padding: 10,
+                height: Platform.OS === 'ios' ? 80 : 60,
+              },
+            })}
+          >
+            <Tab.Screen name='Home' component={InsideStack} />
+            <Tab.Screen
+              name='Discover'
+              component={DiscoverScreen}
+              options={{ headerShown: true }}
+            />
+            <Tab.Screen
+              name='Settings'
+              component={SettingsScreen}
+              options={{ headerShown: true }}
+            />
+          </Tab.Navigator>
+        ) : (
+          !showIntro && <AuthStack />
+        )}
+      </NavigationContainer>
+    </UserLocationContext.Provider>
   );
 }
 
