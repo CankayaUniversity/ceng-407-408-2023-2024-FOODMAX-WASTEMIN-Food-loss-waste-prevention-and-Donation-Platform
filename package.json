@@ -19,6 +19,7 @@
     "@react-navigation/stack": "^6.3.25",
     "axios": "^1.6.8",
     "expo": "~50.0.8",
+    "expo-font": "^11.10.3",
     "expo-image-picker": "^14.7.1",
     "expo-location": "^16.5.5",
     "expo-status-bar": "~1.11.1",

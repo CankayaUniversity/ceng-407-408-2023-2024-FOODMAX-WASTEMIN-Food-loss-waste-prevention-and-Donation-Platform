@@ -92,23 +92,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    width: '80%',
+    width: '90%',
     color: Colors.green,
     fontSize: 36,
-    fontWeight: '700',
     textAlign: 'center',
     marginBottom: 20,
+    fontFamily: 'Poppins-Bold',
   },
   description: {
     color: Colors.navy,
     fontSize: 16,
     lineHeight: 20,
     textAlign: 'center',
+    fontFamily: 'Poppins-Regular',
   },
   button: {
     padding: 10,
     fontSize: 16,
     color: Colors.navy,
+    fontFamily: 'Poppins-Regular',
   },
 });
 

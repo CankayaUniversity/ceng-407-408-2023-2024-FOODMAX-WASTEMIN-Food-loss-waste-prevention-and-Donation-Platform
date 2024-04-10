@@ -13,13 +13,14 @@ import DiscoverScreen from './screens/DiscoverScreen';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from './constants/colors';
-import { Platform, View, Text, StyleSheet } from 'react-native';
+import { Platform, View, Text } from 'react-native';
 import './src/i18n/i18n.config';
 import FoodPost from './screens/FoodPost';
 import axios from 'axios';
 import { UserLocationContext } from './src/context/UserLocationContext';
 import * as Location from 'expo-location';
 import AppIntroSlides from './components/AppIntroSlides';
+import { useFonts } from 'expo-font';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -65,14 +66,12 @@ export default function App() {
   const [data, setData] = useState('');
   const [showIntro, setShowIntro] = useState(true);
   const [location, setLocation] = useState(null);
-
-  const buttonLabel = (label) => {
-    return (
-      <View>
-        <Text style={styles.button}>{label}</Text>
-      </View>
-    );
-  };
+  const [fontsLoaded] = useFonts({
+    'Poppins-Regular': require('./assets/fonts/Poppins-Regular.ttf'),
+    'Poppins-Medium': require('./assets/fonts/Poppins-Medium.ttf'),
+    'Poppins-SemiBold': require('./assets/fonts/Poppins-SemiBold.ttf'),
+    'Poppins-Bold': require('./assets/fonts/Poppins-Bold.ttf'),
+  });
 
   useEffect(() => {
     fetchData();
