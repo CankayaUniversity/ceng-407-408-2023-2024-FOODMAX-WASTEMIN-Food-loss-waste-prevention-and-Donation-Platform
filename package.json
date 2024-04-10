@@ -20,6 +20,7 @@
     "axios": "^1.6.8",
     "expo": "~50.0.8",
     "expo-image-picker": "^14.7.1",
+    "expo-location": "^16.5.5",
     "expo-status-bar": "~1.11.1",
     "firebase": "^10.8.1",
     "i18next": "^23.10.1",
@@ -32,6 +33,7 @@
     "react-native-gesture-handler": "~2.14.0",
     "react-native-image-crop-picker": "^0.40.3",
     "react-native-image-picker": "^7.1.2",
+    "react-native-maps": "1.10.0",
     "react-native-safe-area-context": "4.8.2",
     "react-native-screens": "~3.29.0",
     "react-native-svg": "^15.1.0"

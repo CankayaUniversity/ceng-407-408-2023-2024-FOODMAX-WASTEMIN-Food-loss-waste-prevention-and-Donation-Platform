@@ -21,11 +21,20 @@
       "permissions": ["READ_EXTERNAL_STORAGE"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#ffffff",
+        "googleMapsApiKey": "${process.env.EXPO_GOOGLE_PUBLIC_API_KEY}"
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow NourishMe to use your location."
+        }
+      ]
+    ]
   }
 }
