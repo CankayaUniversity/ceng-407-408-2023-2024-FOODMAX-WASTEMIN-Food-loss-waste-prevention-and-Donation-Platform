@@ -112,6 +112,11 @@ export default function App() {
     });
   }, []);
 
+  if (!fontsLoaded) {
+    // Fonts are not yet loaded, you can return a loading indicator or null
+    return null;
+  }
+
   return (
     <UserLocationContext.Provider value={{ location, setLocation }}>
       <NavigationContainer>
