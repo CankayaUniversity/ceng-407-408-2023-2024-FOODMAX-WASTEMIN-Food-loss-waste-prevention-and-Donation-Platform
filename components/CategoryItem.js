@@ -1,0 +1,38 @@
+import { View, Text, Image, StyleSheet } from 'react-native';
+import React from 'react';
+import Colors from '../constants/colors';
+import { SIZES } from '../constants/sizes';
+
+export default function CategoryItem({ category }) {
+  return (
+    <View style={styles.container}>
+      <Image style={styles.icon} source={category.icon} />
+      <Text style={styles.iconLabel}>{category.name}</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    width: (SIZES.width - 64) / 3,
+    height: 100,
+    padding: 4,
+    margin: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: 10,
+    elevation: 1,
+    shadowColor: Colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  icon: {
+    width: 50,
+    height: 50,
+  },
+  iconLabel: {
+    fontSize: 12,
+  },
+});

@@ -14,6 +14,12 @@ const Colors = {
 
   // white
   white: '#FFFFFF',
+
+  // black
+  black: '#000000',
+
+  // yellow
+  yellow: '#fabd07',
 };
 
 export default Colors;
