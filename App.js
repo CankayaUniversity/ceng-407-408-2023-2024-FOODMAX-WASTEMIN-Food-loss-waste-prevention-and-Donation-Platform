@@ -13,11 +13,15 @@ import DiscoverScreen from './screens/DiscoverScreen';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from './constants/colors';
-import { Platform } from 'react-native';
+import { Platform, View, Text } from 'react-native';
 import './src/i18n/i18n.config';
 import FoodPost from './screens/FoodPost';
 import FoodPostEdit from './screens/FoodPostEdit';
 import axios from 'axios';
+import { UserLocationContext } from './src/context/UserLocationContext';
+import * as Location from 'expo-location';
+import AppIntroSlides from './components/AppIntroSlides';
+import { useFonts } from 'expo-font';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -66,9 +70,28 @@ export default function App() {
   const [user, setUser] = useState(null);
   const { t, i18n } = useTranslation();
   const [data, setData] = useState('');
+  const [showIntro, setShowIntro] = useState(true);
+  const [location, setLocation] = useState(null);
+  const [fontsLoaded] = useFonts({
+    'Poppins-Regular': require('./assets/fonts/Poppins-Regular.ttf'),
+    'Poppins-Medium': require('./assets/fonts/Poppins-Medium.ttf'),
+    'Poppins-SemiBold': require('./assets/fonts/Poppins-SemiBold.ttf'),
+    'Poppins-Bold': require('./assets/fonts/Poppins-Bold.ttf'),
+  });
 
   useEffect(() => {
     fetchData();
+
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permission to access location was denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+    })();
   }, []);
 
   const fetchData = async () => {
@@ -91,56 +114,71 @@ export default function App() {
   useEffect(() => {
     onAuthStateChanged(FIREBASE_AUTH, (user) => {
       setUser(user);
+      setShowIntro(!user);
     });
   }, []);
 
+  if (!fontsLoaded) {
+    // Fonts are not yet loaded, you can return a loading indicator or null
+    return null;
+  }
+
   return (
-    <NavigationContainer>
-      {user ? (
-        <Tab.Navigator
-          screenOptions={({ route }) => ({
-            headerShown: false,
-            tabBarIcon: ({ focused, color, size }) => {
-              let iconName;
-
-              if (route.name === 'Home') {
-                iconName = focused ? 'home' : 'home-outline';
-              } else if (route.name === 'Settings') {
-                iconName = focused ? 'settings' : 'settings-outline';
-              } else if (route.name === 'Discover') {
-                iconName = focused ? 'search' : 'search-outline';
-              }
-
-              // You can return any component here that you want as the icon
-              return <Ionicons name={iconName} size={size} color={color} />;
-            },
-            tabBarActiveTintColor: Colors.green,
-            tabBarInactiveTintColor: Colors.gray,
-            tabBarLabelStyle: {
-              fontSize: 10,
-              paddingBottom: Platform.OS === 'ios' ? 0 : 10,
-            },
-            tabBarStyle: {
-              padding: 10,
-              height: Platform.OS === 'ios' ? 80 : 60,
-            },
-          })}
-        >
-          <Tab.Screen name='Home' component={InsideStack} />
-          <Tab.Screen
-            name='Discover'
-            component={DiscoverScreen}
-            options={{ headerShown: true }}
+    <UserLocationContext.Provider value={{ location, setLocation }}>
+      <NavigationContainer>
+        {showIntro && (
+          <AppIntroSlides
+            onFinish={() => {
+              setShowIntro(false);
+            }}
           />
-          <Tab.Screen
-            name='Settings'
-            component={SettingsScreen}
-            options={{ headerShown: true }}
-          />
-        </Tab.Navigator>
-      ) : (
-        <AuthStack />
-      )}
-    </NavigationContainer>
+        )}
+        {user ? (
+          <Tab.Navigator
+            screenOptions={({ route }) => ({
+              headerShown: false,
+              tabBarIcon: ({ focused, color, size }) => {
+                let iconName;
+
+                if (route.name === 'Home') {
+                  iconName = focused ? 'home' : 'home-outline';
+                } else if (route.name === 'Settings') {
+                  iconName = focused ? 'settings' : 'settings-outline';
+                } else if (route.name === 'Discover') {
+                  iconName = focused ? 'search' : 'search-outline';
+                }
+
+                // You can return any component here that you want as the icon
+                return <Ionicons name={iconName} size={size} color={color} />;
+              },
+              tabBarActiveTintColor: Colors.green,
+              tabBarInactiveTintColor: Colors.gray,
+              tabBarLabelStyle: {
+                fontSize: 10,
+                paddingBottom: Platform.OS === 'ios' ? 0 : 10,
+              },
+              tabBarStyle: {
+                padding: 10,
+                height: Platform.OS === 'ios' ? 80 : 60,
+              },
+            })}
+          >
+            <Tab.Screen name='Home' component={InsideStack} />
+            <Tab.Screen
+              name='Discover'
+              component={DiscoverScreen}
+              options={{ headerShown: true }}
+            />
+            <Tab.Screen
+              name='Settings'
+              component={SettingsScreen}
+              options={{ headerShown: true }}
+            />
+          </Tab.Navigator>
+        ) : (
+          !showIntro && <AuthStack />
+        )}
+      </NavigationContainer>
+    </UserLocationContext.Provider>
   );
 }

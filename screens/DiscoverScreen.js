@@ -1,9 +1,10 @@
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
+import GoogleMapView from '../components/GoogleMapView';
 
 function DiscoverScreen() {
   return (
     <View>
-      <Text>Discover Screen</Text>
+      <GoogleMapView />
     </View>
   );
 }

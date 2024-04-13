@@ -31,12 +31,17 @@ function Home({ navigation }) {
           console.error('Error fetching nearby places:', error);
         });
 
+
     }
   };
 
   useEffect(() => {
     GetNearBySearchPlace('restaurant');
   }, [location]);
+
+
+  // const renderItem = ({ item }) => <FoodItem data={item} />;
+
 
   // const renderItem = ({ item }) => <FoodItem data={item} />;
 
