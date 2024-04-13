@@ -30,6 +30,8 @@ function Home({ navigation }) {
         .catch((error) => {
           console.error('Error fetching nearby places:', error);
         });
+
+
     }
   };
 
@@ -37,7 +39,12 @@ function Home({ navigation }) {
     GetNearBySearchPlace('restaurant');
   }, [location]);
 
+
   // const renderItem = ({ item }) => <FoodItem data={item} />;
+
+
+  // const renderItem = ({ item }) => <FoodItem data={item} />;
+
 
   return (
     <ScrollView style={styles.container}>

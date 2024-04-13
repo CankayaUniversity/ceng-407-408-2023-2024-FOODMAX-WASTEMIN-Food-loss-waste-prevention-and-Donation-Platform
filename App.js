@@ -16,6 +16,7 @@ import Colors from './constants/colors';
 import { Platform, View, Text } from 'react-native';
 import './src/i18n/i18n.config';
 import FoodPost from './screens/FoodPost';
+import FoodPostEdit from './screens/FoodPostEdit';
 import axios from 'axios';
 import { UserLocationContext } from './src/context/UserLocationContext';
 import * as Location from 'expo-location';
@@ -54,6 +55,11 @@ function InsideStack() {
         name='FoodPost'
         component={FoodPost}
         options={{ title: 'Foods' }}
+      />
+      <Stack.Screen 
+        name='FoodPostEdit' 
+        component={FoodPostEdit} // Add FoodPostEdit screen here
+        options={{ title: 'Edit Food' }} // Customize the title as needed
       />
       <Stack.Screen name='Details' component={DetailsScreen} />
     </Stack.Navigator>
