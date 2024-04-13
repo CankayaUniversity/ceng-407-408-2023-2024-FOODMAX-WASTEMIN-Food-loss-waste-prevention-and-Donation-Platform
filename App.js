@@ -6,7 +6,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from './FirebaseConfig';
 import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/Home';
-import DetailsScreen from './screens/Details';
+import FoodPostListScreen from './screens/FoodPostList';
 import RegisterScreen from './screens/RegisterScreen';
 import SettingsScreen from './screens/Settings';
 import DiscoverScreen from './screens/DiscoverScreen';
@@ -56,12 +56,16 @@ function InsideStack() {
         component={FoodPost}
         options={{ title: 'Foods' }}
       />
-      <Stack.Screen 
-        name='FoodPostEdit' 
-        component={FoodPostEdit} // Add FoodPostEdit screen here
-        options={{ title: 'Edit Food' }} // Customize the title as needed
+      <Stack.Screen
+        name='FoodPostEdit'
+        component={FoodPostEdit}
+        options={{ title: 'Edit Food' }}
       />
-      <Stack.Screen name='Details' component={DetailsScreen} />
+      <Stack.Screen
+        name='FoodPostList'
+        component={FoodPostListScreen}
+        options={{ title: 'Food Posts' }}
+      />
     </Stack.Navigator>
   );
 }

@@ -82,7 +82,7 @@ function FoodPost({ navigation }) {
       ); // Use merge option to update existing document
 
       alert('Food Post created successfully!');
-      navigation.navigate('HomeScreen');
+      navigation.navigate('FoodPostList');
     } catch (error) {
       console.error('Error adding document: ', error);
       alert('Failed to create document. Please try again.');
@@ -178,7 +178,6 @@ function FoodPost({ navigation }) {
           <Text style={styles.screenText}>{t('Create Food Post')}</Text>
         </View>
         <View style={styles.bottomContainer}>
-          
           <TextInput
             value={FoodPostTitle}
             placeholder='Title'

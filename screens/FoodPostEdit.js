@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, ScrollView, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import {
+  View,
+  TextInput,
+  Button,
+  ScrollView,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { doc, getDoc, updateDoc } from 'firebase/firestore'; 
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes } from 'firebase/storage';
 import { useTranslation } from 'react-i18next';
 import Colors from '../constants/colors';
 import { Picker } from '@react-native-picker/picker';
 
-import {
-  FIREBASE_FIRESTORE,
-  FIREBASE_STORAGE,
-} from '../FirebaseConfig';
+import { FIREBASE_FIRESTORE, FIREBASE_STORAGE } from '../FirebaseConfig';
 
 function FoodPostEdit({ route, navigation }) {
   const { t } = useTranslation();
@@ -19,11 +24,10 @@ function FoodPostEdit({ route, navigation }) {
   const [loading, setLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [expiryDate, setExpiryDate] = useState(new Date());
-  const { postId } = route.params; 
+  const { postId } = route.params;
   const foodTypes = ['Produce', 'Pastries', 'Meals', 'Packaged Food'];
   const [selectedFoodType, setSelectedFoodType] = useState('');
   const [foodPostAllergyWarning, setFoodPostAllergyWarning] = useState([]);
-
 
   useEffect(() => {
     const fetchFoodPost = async () => {
@@ -47,7 +51,7 @@ function FoodPostEdit({ route, navigation }) {
         console.error('Error fetching document:', error);
       }
     };
-  
+
     fetchFoodPost();
   }, [postId]);
 
@@ -57,7 +61,7 @@ function FoodPostEdit({ route, navigation }) {
       const docRef = doc(FIREBASE_FIRESTORE, 'FoodPost', postId);
       await updateDoc(docRef, foodPost);
       console.log('Document successfully updated!');
-      navigation.navigate('HomeScreen');
+      navigation.navigate('FoodPostList');
     } catch (error) {
       console.error('Error updating document:', error);
     } finally {
@@ -75,15 +79,14 @@ function FoodPostEdit({ route, navigation }) {
 
   const handleChange = (field, value) => {
     console.log('Updating field:', field, 'with value:', value);
-    setFoodPost(prevState => ({
+    setFoodPost((prevState) => ({
       ...prevState,
-      [field]: value
+      [field]: value,
     }));
     if (field === 'PostFoodType') {
       setSelectedFoodType(value); // Update selectedFoodType state
     }
   };
-  
 
   const selectExpiryDate = () => {
     setShowDatePicker(true);
@@ -113,7 +116,9 @@ function FoodPostEdit({ route, navigation }) {
 
     if (!result.cancelled) {
       const selectedImage = result.assets[0];
-      const fileName = selectedImage.uri.substring(selectedImage.uri.lastIndexOf('/') + 1);
+      const fileName = selectedImage.uri.substring(
+        selectedImage.uri.lastIndexOf('/') + 1
+      );
       const storageRef = ref(FIREBASE_STORAGE, 'images/' + fileName);
       const response = await fetch(selectedImage.uri);
       const blob = await response.blob();
@@ -141,44 +146,44 @@ function FoodPostEdit({ route, navigation }) {
             autoCapitalize='none'
             style={styles.input}
             value={foodPost?.PostTitle || ''}
-            placeholder="Title"
+            placeholder='Title'
             onChangeText={(text) => handleChange('PostTitle', text)}
           />
           <TextInput
             style={styles.input}
             value={foodPost?.PostDescription || ''}
-            placeholder="Description"
+            placeholder='Description'
             onChangeText={(text) => handleChange('PostDescription', text)}
           />
-          <Button title="Select Image" onPress={selectImage} />
+          <Button title='Select Image' onPress={selectImage} />
 
           <TextInput
             style={styles.input}
             value={foodPost?.PostQuantity || ''}
-            placeholder="Quantity"
+            placeholder='Quantity'
             onChangeText={(text) => handleChange('PostQuantity', text)}
           />
           <TextInput
             style={styles.input}
             value={foodPost?.PostPrice || ''}
-            placeholder="Price"
+            placeholder='Price'
             onChangeText={(text) => handleChange('PostPrice', text)}
           />
           <Text>Food Type</Text>
           <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={selectedFoodType}
-            style={{ height: 50, width: '100%' }}
-            onValueChange={(itemValue, itemIndex) =>
-              handleChange('PostFoodType', itemValue) // Call handleChange function
-            }
-          >
-            <Picker.Item label='Select Food Type' value='' />
-            {foodTypes.map((type, index) => (
-              <Picker.Item key={index} label={type} value={type} />
-            ))}
-          </Picker>
-
+            <Picker
+              selectedValue={selectedFoodType}
+              style={{ height: 50, width: '100%' }}
+              onValueChange={
+                (itemValue, itemIndex) =>
+                  handleChange('PostFoodType', itemValue) // Call handleChange function
+              }
+            >
+              <Picker.Item label='Select Food Type' value='' />
+              {foodTypes.map((type, index) => (
+                <Picker.Item key={index} label={type} value={type} />
+              ))}
+            </Picker>
           </View>
 
           <Text>Allergy Warnings</Text>
@@ -249,17 +254,16 @@ function FoodPostEdit({ route, navigation }) {
             />
           </View>
 
-          
-          <Button title="Select Expiry Date" onPress={selectExpiryDate} />
+          <Button title='Select Expiry Date' onPress={selectExpiryDate} />
 
           {loading ? (
             <ActivityIndicator size='large' color='#0000ff' />
           ) : (
             <>
-              <Button title="Save" onPress={handleEdit} />
+              <Button title='Save' onPress={handleEdit} />
               <Button
                 title='Back'
-                onPress={() => navigation.navigate('HomeScreen')}
+                onPress={() => navigation.navigate('FoodPostList')}
               />
             </>
           )}
@@ -267,8 +271,8 @@ function FoodPostEdit({ route, navigation }) {
           {showDatePicker && (
             <DateTimePicker
               value={expiryDate}
-              mode="date"
-              display="default"
+              mode='date'
+              display='default'
               onChange={handleDateChange}
             />
           )}

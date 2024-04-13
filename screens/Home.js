@@ -55,10 +55,15 @@ function Home({ navigation }) {
         setSelectedCategory={(value) => GetNearBySearchPlace(value)}
       />
       {placeList && <PlaceList placeList={placeList} />}
+      {/* put these temporarily here */}
       <View style={styles.button}>
         <Button
           onPress={() => navigation.navigate('FoodPost')}
-          title='Open Food Post'
+          title='Create Food Post'
+        />
+        <Button
+          onPress={() => navigation.navigate('FoodPostList')}
+          title='Open Food Post List'
         />
       </View>
     </ScrollView>
