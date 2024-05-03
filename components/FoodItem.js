@@ -35,6 +35,27 @@ const FoodItem = ({ data }) => {
     return currentUser && data.PostFoodProvider === currentUser.uid;
   };
 
+  const handleBuy = async () => {
+    try {
+      // Create a new order document
+      const orderRef = doc(db, 'Orders');
+      await setDoc(orderRef, {
+        userId: currentUser.uid,
+        postId: data.id,
+        // Add any other relevant data to the order
+      });
+
+      // You can also update the inventory or do other actions here
+
+      Alert.alert('Success', 'Order placed successfully.');
+    } catch (error) {
+      console.error('Error placing order:', error);
+      Alert.alert('Error', 'Failed to place order. Please try again later.');
+    }
+  };
+
+
+
   return (
     <View style={styles.container}>
       {imageURL && <Image source={{ uri: imageURL }} style={styles.image} />}
@@ -43,12 +64,19 @@ const FoodItem = ({ data }) => {
         <Text style={styles.description}>{data.PostDescription}</Text>
         <Text style={styles.price}>Price: ${data.PostPrice}</Text>
         <Text style={styles.quantity}>Quantity: {data.PostQuantity}</Text>
-        {isCurrentUserMatched() && (
+        {isCurrentUserMatched() ? (
           <Button
             onPress={() =>
               navigation.navigate('FoodPostEdit', { postId: data.id })
             }
             title='Edit Food Post'
+          />
+        ) : (
+          <Button
+            onPress={() => {
+              handleBuy
+            }}
+            title='Buy'
           />
         )}
       </View>

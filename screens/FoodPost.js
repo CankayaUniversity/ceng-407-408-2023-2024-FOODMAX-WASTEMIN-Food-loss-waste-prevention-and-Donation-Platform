@@ -24,6 +24,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes } from 'firebase/storage';
 
 function FoodPost({ navigation }) {
+  const [FoodPostAvailability, setFoodPostAvailability] = useState('');
   const [FoodPostTitle, setFoodPostTitle] = useState('');
   const [FoodPostDescription, setFoodPostDescription] = useState('');
   const [FoodPostQuantity, setFoodPostQuantity] = useState('');
@@ -60,6 +61,7 @@ function FoodPost({ navigation }) {
 
       const FoodPostRef = await addDoc(collection(firestore, 'FoodPost'), {
         PostId: '',
+        PostAvailability: FoodPostAvailability,
         PostTitle: FoodPostTitle,
         PostDate: Timestamp.fromDate(new Date()),
         PostDescription: FoodPostDescription,
@@ -77,6 +79,7 @@ function FoodPost({ navigation }) {
         doc(firestore, 'FoodPost', FoodPostRef.id),
         {
           PostId: FoodPostRef.id,
+          PostAvailability: 0,
         },
         { merge: true }
       ); // Use merge option to update existing document
