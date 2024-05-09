@@ -93,7 +93,7 @@ function Home({ navigation }) {
       />
     )
   ))}
-  <Marker title='You' coordinate={mapRegion} />
+   {/* <Marker title='You' coordinate={mapRegion} pinColor="red" /> */}
 </MapView>
 
 )}
