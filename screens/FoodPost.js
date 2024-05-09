@@ -19,6 +19,8 @@ import {
   FIREBASE_STORAGE,
 } from '../FirebaseConfig';
 import { collection, addDoc, doc, setDoc, Timestamp } from 'firebase/firestore';
+import GoogleMapView from '../components/GoogleMapView';
+
 
 import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes } from 'firebase/storage';
@@ -33,7 +35,9 @@ function FoodPost({ navigation }) {
   const [FoodPostPhotos, setFoodPostPhotos] = useState([]);
   const [FoodPostAllergyWarning, setFoodPostAllergyWarning] = useState([]);
   const [FoodPostExipry, setFoodPostExipry] = useState(new Date());
+  const [selectedSpot, setSelectedSpot] = useState(null);
 
+  
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
@@ -42,12 +46,18 @@ function FoodPost({ navigation }) {
 
   const foodTypes = ['Produce', 'Pastries', 'Meals', 'Packaged Food'];
 
+  const handleSelectSpot = (spot) => {
+    setSelectedSpot(spot);
+  };
+
+
   const createFoodPost = async () => {
     setLoading(true);
     try {
       const currentUser = auth.currentUser;
       const userDisplayName = currentUser.uid;
 
+      console.log('Selected spot:', selectedSpot);
       const isValidInteger = /^[1-9][0-9]*$/.test(FoodPostQuantity);
       if (!isValidInteger) {
         alert('Quantity must be a valid integer');
@@ -56,6 +66,10 @@ function FoodPost({ navigation }) {
       const isValidPositiveInteger = /^(0|[1-9][0-9]*)$/.test(FoodPostPrice);
       if (!isValidPositiveInteger) {
         alert('Price must be a valid positive integer');
+        return;
+      }
+      if (FoodPostPhotos.length === 0) {
+        alert('Please select at least one picture.');
         return;
       }
 
@@ -72,6 +86,7 @@ function FoodPost({ navigation }) {
         PostPrice: FoodPostPrice,
         PostFoodProvider: userDisplayName,
         PostPhotos: FoodPostPhotos,
+        PostSelectedSpot: selectedSpot,
       });
 
       // Update the document to set PostId
@@ -80,6 +95,7 @@ function FoodPost({ navigation }) {
         {
           PostId: FoodPostRef.id,
           PostAvailability: 0,
+          PostSelectedSpot: selectedSpot,
         },
         { merge: true }
       ); // Use merge option to update existing document
@@ -209,6 +225,9 @@ function FoodPost({ navigation }) {
             title='Pick an image from camera roll'
             onPress={selectImage}
           />
+
+           <Text>Maps</Text>
+           <GoogleMapView onSelectSpot={handleSelectSpot} />
 
           <TextInput
             value={FoodPostQuantity}

@@ -1,10 +1,10 @@
-import { View, StyleSheet, Dimensions } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { UserLocationContext } from '../src/context/UserLocationContext';
 
-export default function GoogleMapView() {
-  const { location, setLocation } = useContext(UserLocationContext);
+export default function GoogleMapView({ selectedSpot, onSelectSpot }) {
+  const { location } = useContext(UserLocationContext);
   const [mapRegion, setMapRegion] = useState();
 
   useEffect(() => {
@@ -16,7 +16,11 @@ export default function GoogleMapView() {
         longitudeDelta: 0.0421,
       });
     }
-  }, []);
+  }, [location]);
+
+  const handleMapPress = (event) => {
+    onSelectSpot(event.nativeEvent.coordinate);
+  };
 
   return (
     <View style={styles.container}>
@@ -26,8 +30,15 @@ export default function GoogleMapView() {
           provider={PROVIDER_GOOGLE}
           showsUserLocation={true}
           region={mapRegion}
+          onPress={handleMapPress}
         >
-          <Marker title='You' coordinate={mapRegion} />
+          {selectedSpot && (
+            <Marker
+              title='Selected Spot'
+              coordinate={selectedSpot}
+              pinColor='blue'
+            />
+          )}
         </MapView>
       )}
     </View>

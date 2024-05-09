@@ -10,12 +10,21 @@ import { SIZES } from '../constants/sizes';
 function Home({ navigation }) {
   const [placeList, setPlaceList] = useState([]);
   const { location, setLocation } = useContext(UserLocationContext);
-  const mapRegion = {
-    latitude: location.coords.latitude,
-    longitude: location.coords.longitude,
-    latitudeDelta: 0.0322,
-    longitudeDelta: 0.0421,
-  };
+  const mapRegion = location
+  ? {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      latitudeDelta: 0.0322,
+      longitudeDelta: 0.0421,
+    }
+  : {
+      // Default location if location is not available
+      latitude: 0,
+      longitude: 0,
+      latitudeDelta: 0.0322,
+      longitudeDelta: 0.0421,
+    };
+
 
   const GetNearBySearchPlace = (value) => {
     if (location) {
