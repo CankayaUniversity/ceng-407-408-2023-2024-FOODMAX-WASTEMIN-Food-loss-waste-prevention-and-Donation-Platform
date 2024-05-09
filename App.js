@@ -22,6 +22,8 @@ import { UserLocationContext } from './src/context/UserLocationContext';
 import * as Location from 'expo-location';
 import AppIntroSlides from './components/AppIntroSlides';
 import { useFonts } from 'expo-font';
+import ProfileSettings from './screens/ProfileSettings';
+import StoreLogin from './screens/StoreLogin';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -65,6 +67,28 @@ function InsideStack() {
         name='FoodPostList'
         component={FoodPostListScreen}
         options={{ title: 'Food Posts' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function SettingsStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: true }}>
+      <Stack.Screen
+        name='SettingsScreen'
+        component={SettingsScreen}
+        options={{ title: 'Settings' }}
+      />
+      <Stack.Screen
+        name='ProfileScreen'
+        component={ProfileSettings}
+        options={{ title: 'Profile Settings' }}
+      />
+      <Stack.Screen
+        name='StoreScreen'
+        component={StoreLogin}
+        options={{ title: 'Store Login' }}
       />
     </Stack.Navigator>
   );
@@ -146,8 +170,8 @@ export default function App() {
 
                 if (route.name === 'Home') {
                   iconName = focused ? 'home' : 'home-outline';
-                } else if (route.name === 'Settings') {
-                  iconName = focused ? 'settings' : 'settings-outline';
+                } else if (route.name === 'Me') {
+                  iconName = focused ? 'person' : 'person-outline';
                 } else if (route.name === 'Discover') {
                   iconName = focused ? 'search' : 'search-outline';
                 }
@@ -174,9 +198,9 @@ export default function App() {
               options={{ headerShown: true }}
             />
             <Tab.Screen
-              name='Settings'
-              component={SettingsScreen}
-              options={{ headerShown: true }}
+              name='Me'
+              component={SettingsStack}
+              options={{ headerShown: false }}
             />
           </Tab.Navigator>
         ) : (

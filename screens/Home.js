@@ -1,7 +1,7 @@
 import { View, StyleSheet, ScrollView, Button, Alert } from 'react-native';
 import { useState, useEffect, useContext } from 'react';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { collection, getDocs } from 'firebase/firestore'; 
+import { collection, getDocs } from 'firebase/firestore';
 import { FIREBASE_FIRESTORE } from '../FirebaseConfig';
 import CategoryList from '../components/CategoryList';
 import GlobalApi from '../src/services/GlobalApi';
@@ -13,20 +13,12 @@ function Home({ navigation }) {
   const [placeList, setPlaceList] = useState([]);
   const [foodPosts, setFoodPosts] = useState([]); // New state for food posts
   const { location, setLocation } = useContext(UserLocationContext);
-  const mapRegion = location
-    ? {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.0322,
-        longitudeDelta: 0.0421,
-      }
-    : {
-        // Default location if location is not available
-        latitude: 0,
-        longitude: 0,
-        latitudeDelta: 0.0322,
-        longitudeDelta: 0.0421,
-      };
+  const mapRegion = {
+    latitude: location.coords.latitude,
+    longitude: location.coords.longitude,
+    latitudeDelta: 0.0322,
+    longitudeDelta: 0.0421,
+  };
 
   const GetNearBySearchPlace = (value) => {
     if (location) {
@@ -46,7 +38,9 @@ function Home({ navigation }) {
 
   const fetchFoodPosts = async () => {
     try {
-      const querySnapshot = await getDocs(collection(FIREBASE_FIRESTORE, 'FoodPost'));
+      const querySnapshot = await getDocs(
+        collection(FIREBASE_FIRESTORE, 'FoodPost')
+      );
       const fetchedData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -73,31 +67,29 @@ function Home({ navigation }) {
   return (
     <ScrollView style={styles.container}>
       <View>
-      {location && (
-        <MapView
-  style={styles.map}
-  provider={PROVIDER_GOOGLE}
-  showsUserLocation={true}
-  region={mapRegion}
->
-  {foodPosts.map((post, index) => (
-    post.PostSelectedSpot && (
-      <Marker
-        key={index}
-        coordinate={{
-          latitude: parseFloat(post.PostSelectedSpot.latitude),
-          longitude: parseFloat(post.PostSelectedSpot.longitude),
-        }}
-        title={post.PostTitle}
-        pinColor="red"
-      />
-    )
-  ))}
-  {/* <Marker title='You' coordinate={mapRegion} /> */}
-</MapView>
-
-)}
-
+        {location && (
+          <MapView
+            style={styles.map}
+            provider={PROVIDER_GOOGLE}
+            showsUserLocation={true}
+            region={mapRegion}
+          >
+            {foodPosts.map(
+              (post, index) =>
+                post.PostSelectedSpot && (
+                  <Marker
+                    key={index}
+                    coordinate={{
+                      latitude: parseFloat(post.PostSelectedSpot.latitude),
+                      longitude: parseFloat(post.PostSelectedSpot.longitude),
+                    }}
+                    title={post.PostTitle}
+                    pinColor='red'
+                  />
+                )
+            )}
+          </MapView>
+        )}
       </View>
       <CategoryList
         setSelectedCategory={(value) => GetNearBySearchPlace(value)}
