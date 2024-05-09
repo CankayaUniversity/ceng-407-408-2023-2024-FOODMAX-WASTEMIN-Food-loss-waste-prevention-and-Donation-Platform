@@ -226,7 +226,7 @@ function FoodPost({ navigation }) {
             onPress={selectImage}
           />
 
-           <Text>Maps</Text>
+           <Text>Press on map to pick a pickup spot:</Text>
            <GoogleMapView onSelectSpot={handleSelectSpot} />
 
           <TextInput
