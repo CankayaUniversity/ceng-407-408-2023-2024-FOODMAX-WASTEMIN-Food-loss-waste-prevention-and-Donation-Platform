@@ -1,23 +1,29 @@
-import { View, FlatList } from 'react-native';
-import { collection, getDocs } from 'firebase/firestore';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FlatList, View, Text } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FIREBASE_FIRESTORE } from '../FirebaseConfig';
 import FoodItem from '../components/FoodItem';
-import { useState, useEffect, useCallback } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
+import FoodSearch from '../components/FoodSearch'; 
 
 function FoodPostList() {
   const [foodItems, setFoodItems] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchData = async () => {
     try {
-      const querySnapshot = await getDocs(
-        collection(FIREBASE_FIRESTORE, 'FoodPost')
-      );
+      let foodQuery = query(collection(FIREBASE_FIRESTORE, 'FoodPost'));
+
+      if (searchQuery) {
+        foodQuery = query(foodQuery, where('PostTitle', '>=', searchQuery));
+      }
+
+      const querySnapshot = await getDocs(foodQuery);
       const fetchedData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setFoodItems([...fetchedData]); // Update the state with the newly fetched data
+      setFoodItems([...fetchedData]); 
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -25,18 +31,19 @@ function FoodPostList() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [searchQuery]); 
 
   useFocusEffect(
     useCallback(() => {
       fetchData();
-    }, [])
+    }, [searchQuery]) 
   );
 
   const renderItem = ({ item }) => <FoodItem data={item} />;
 
   return (
     <View>
+      <FoodSearch setSearchQuery={setSearchQuery} />
       <FlatList
         data={foodItems}
         renderItem={renderItem}

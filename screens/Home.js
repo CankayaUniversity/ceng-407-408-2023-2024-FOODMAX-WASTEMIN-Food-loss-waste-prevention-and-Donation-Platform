@@ -13,12 +13,19 @@ function Home({ navigation }) {
   const [placeList, setPlaceList] = useState([]);
   const [foodPosts, setFoodPosts] = useState([]); // New state for food posts
   const { location, setLocation } = useContext(UserLocationContext);
-  const mapRegion = {
-    latitude: location.coords.latitude,
-    longitude: location.coords.longitude,
-    latitudeDelta: 0.0322,
-    longitudeDelta: 0.0421,
-  };
+  const mapRegion = location
+  ? {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      latitudeDelta: 0.0322,
+      longitudeDelta: 0.0421,
+    }
+  : {
+      latitude: 0,
+      longitude: 0,
+      latitudeDelta: 0.0322,
+      longitudeDelta: 0.0421,
+    };
 
   const GetNearBySearchPlace = (value) => {
     if (location) {
