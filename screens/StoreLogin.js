@@ -7,7 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
   addDoc,
   collection,
@@ -15,6 +15,8 @@ import {
   doc,
   getDocs,
   getDoc,
+  query,
+  where,
 } from 'firebase/firestore';
 import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../FirebaseConfig';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -32,6 +34,7 @@ const StoreLogin = () => {
   const { location, setLocation } = useContext(UserLocationContext);
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
+  const [foodItems, setFoodItems] = useState([]);
 
   const firestore = FIREBASE_FIRESTORE;
   const auth = FIREBASE_AUTH;
@@ -45,6 +48,11 @@ const StoreLogin = () => {
     latitudeDelta: 0.0322,
     longitudeDelta: 0.0421,
   };
+
+  useEffect(() => {
+    // fetchData();
+    fetchFoods();
+  }, []);
 
   const handleMapPress = (event) => {
     const { coordinate } = event.nativeEvent;
@@ -87,7 +95,16 @@ const StoreLogin = () => {
     }
   };
 
-  //   fetchData();
+  const fetchFoods = async () => {
+    const foodPostsRef = collection(FIREBASE_FIRESTORE, 'FoodPost');
+    const q = query(foodPostsRef, where('PostFoodProvider', '==', user.uid));
+    const querySnapshot = await getDocs(q);
+    const fetchedData = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setFoodItems(fetchedData);
+  };
 
   const addStoreCollection = async () => {
     try {
@@ -99,7 +116,7 @@ const StoreLogin = () => {
         name: name,
         address: address,
         owner: doc(FIREBASE_FIRESTORE, `/users/${user.uid}`),
-        products: [doc(FIREBASE_FIRESTORE, `/products/${user.uid}`)],
+        products: foodItems,
       });
 
       Alert.alert('Success', 'Store collection document added successfully!');
@@ -123,6 +140,7 @@ const StoreLogin = () => {
   return (
     <View style={styles.container}>
       <View>
+        {console.log(foodItems)}
         <Text>Select your store location</Text>
         <MapView
           style={styles.map}

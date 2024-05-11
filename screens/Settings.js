@@ -11,15 +11,23 @@ function Settings() {
     <View>
       <View style={styles.container}>
         <CustomSettingsButton
+          onPress={() => navigation.navigate('MyStoresScreen')}
+          title='My Stores'
+          style={styles.buttonWidthBorder}
+          iconBefore='store'
+        />
+      </View>
+      <View style={styles.container}>
+        <CustomSettingsButton
           onPress={() => navigation.navigate('ProfileScreen')}
           title='Profile Settings'
           style={styles.buttonWidthBorder}
-          iconBefore='settings'
+          iconBefore='account-edit'
         />
         <CustomSettingsButton
           onPress={() => navigation.navigate('StoreScreen')}
           title='Store Login'
-          iconBefore='store'
+          iconBefore='store-plus'
         />
       </View>
       <View style={styles.container}>

@@ -1,7 +1,7 @@
 import { Text, TouchableOpacity, StyleSheet } from 'react-native';
 import React from 'react';
 import Colors from '../constants/colors';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 const CustomSettingsButton = ({
   onPress,
@@ -14,7 +14,7 @@ const CustomSettingsButton = ({
   return (
     <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
       {iconBefore && (
-        <MaterialIcons
+        <MaterialCommunityIcons
           name={iconBefore}
           size={24}
           style={[styles.iconBefore]}
