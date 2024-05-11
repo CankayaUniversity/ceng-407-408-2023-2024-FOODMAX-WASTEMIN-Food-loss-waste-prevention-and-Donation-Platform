@@ -108,6 +108,17 @@ const StoreLogin = () => {
 
   const addStoreCollection = async () => {
     try {
+      const storeQuerySnapshot = await getDocs(
+        query(
+          collection(firestore, 'Store'),
+          where('owner', '==', doc(FIREBASE_FIRESTORE, `/users/${user.uid}`))
+        )
+      );
+      if (!storeQuerySnapshot.empty) {
+        Alert.alert('Error', 'You have already registered a store.');
+        return;
+      }
+
       const docRef = await addDoc(collection(firestore, 'Store'), {
         category: category,
         createdAt: Timestamp.fromDate(new Date()),
@@ -140,7 +151,6 @@ const StoreLogin = () => {
   return (
     <View style={styles.container}>
       <View>
-        {console.log(foodItems)}
         <Text>Select your store location</Text>
         <MapView
           style={styles.map}

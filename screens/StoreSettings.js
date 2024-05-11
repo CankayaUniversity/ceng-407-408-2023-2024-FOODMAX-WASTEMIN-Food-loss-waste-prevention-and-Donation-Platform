@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native';
 import React from 'react';
 
-const StoreList = () => {
+const StoreSettings = () => {
   return (
     <View>
-      <Text>StoreList</Text>
+      <Text>StoreSettings</Text>
     </View>
   );
 };
 
-export default StoreList;
+export default StoreSettings;

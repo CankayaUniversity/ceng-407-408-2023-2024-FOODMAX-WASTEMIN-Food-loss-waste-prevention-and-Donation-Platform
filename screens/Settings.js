@@ -11,8 +11,8 @@ function Settings() {
     <View>
       <View style={styles.container}>
         <CustomSettingsButton
-          onPress={() => navigation.navigate('MyStoresScreen')}
-          title='My Stores'
+          onPress={() => navigation.navigate('MyStoreScreen')}
+          title='My Store'
           style={styles.buttonWidthBorder}
           iconBefore='store'
         />

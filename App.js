@@ -24,7 +24,7 @@ import AppIntroSlides from './components/AppIntroSlides';
 import { useFonts } from 'expo-font';
 import ProfileSettings from './screens/ProfileSettings';
 import StoreLogin from './screens/StoreLogin';
-import StoreList from './screens/StoreList';
+import StoreSettings from './screens/StoreSettings';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -92,9 +92,9 @@ function SettingsStack() {
         options={{ title: 'Store Login' }}
       />
       <Stack.Screen
-        name='MyStoresScreen'
-        component={StoreList}
-        options={{ title: 'Store Login' }}
+        name='MyStoreScreen'
+        component={StoreSettings}
+        options={{ title: 'Store Settings' }}
       />
     </Stack.Navigator>
   );
