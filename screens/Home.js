@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, Button, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, Button } from 'react-native';
 import { useState, useEffect, useContext } from 'react';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { collection, getDocs } from 'firebase/firestore';
@@ -62,14 +62,11 @@ function Home({ navigation }) {
   useEffect(() => {
     GetNearBySearchPlace('restaurant');
     fetchFoodPosts().then((data) => {
-      console.log('Fetched food posts:', data); // Log fetched data
       setFoodPosts(data); // Update foodPosts state
     });
   }, [location]);
 
-  useEffect(() => {
-    console.log('Food posts:', foodPosts); // Log foodPosts state
-  }, [foodPosts]);
+  useEffect(() => {}, [foodPosts]);
 
   return (
     <ScrollView style={styles.container}>
