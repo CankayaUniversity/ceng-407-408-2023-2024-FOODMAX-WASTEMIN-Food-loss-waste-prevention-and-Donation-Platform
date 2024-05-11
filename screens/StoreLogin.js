@@ -1,4 +1,12 @@
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Alert,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
 import React, { useState, useContext } from 'react';
 import {
   addDoc,
@@ -23,6 +31,7 @@ const StoreLogin = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const { location, setLocation } = useContext(UserLocationContext);
   const [address, setAddress] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const firestore = FIREBASE_FIRESTORE;
   const auth = FIREBASE_AUTH;
@@ -48,10 +57,12 @@ const StoreLogin = () => {
   };
 
   const getAddress = (value) => {
+    setLoading(true);
     if (value) {
       GlobalApi.geoCode(value.latitude, value.longitude)
         .then((resp) => {
           setAddress(resp.data.results[0].formatted_address);
+          setLoading(false);
         })
         .catch((error) => {
           console.error('Error fetching geocode:', error);
@@ -96,6 +107,7 @@ const StoreLogin = () => {
       // Clear input fields
       setLogo('');
       setName('');
+      setAddress('');
       setCategory('');
       setDescription('');
       navigation.navigate('SettingsScreen');
@@ -123,7 +135,11 @@ const StoreLogin = () => {
         </MapView>
         {selectedLocation && (
           <View style={styles.addressBox}>
-            <Text>Address: {address}</Text>
+            {loading ? (
+              <ActivityIndicator size='large' color='#0000ff' />
+            ) : (
+              <Text>Address: {address}</Text>
+            )}
           </View>
         )}
       </View>
