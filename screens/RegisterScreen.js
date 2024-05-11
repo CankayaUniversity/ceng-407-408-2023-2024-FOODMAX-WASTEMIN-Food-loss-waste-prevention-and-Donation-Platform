@@ -12,7 +12,7 @@ import Colors from '../constants/colors';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../FirebaseConfig';
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { Timestamp, doc, setDoc } from 'firebase/firestore';
 
 function RegisterScreen({ navigation }) {
   const [username, setUsername] = useState('');
@@ -33,7 +33,7 @@ function RegisterScreen({ navigation }) {
       );
       const uid = userCredential.user.uid;
 
-      await addDoc(collection(firestore, 'users'), {
+      await setDoc(doc(firestore, 'users', uid), {
         uid: uid,
         createdAt: Timestamp.fromDate(new Date()),
         fullName: username,
