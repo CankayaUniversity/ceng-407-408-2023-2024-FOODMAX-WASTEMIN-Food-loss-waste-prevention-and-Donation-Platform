@@ -25,6 +25,7 @@ import { useFonts } from 'expo-font';
 import ProfileSettings from './screens/ProfileSettings';
 import StoreLogin from './screens/StoreLogin';
 import StoreSettings from './screens/StoreSettings';
+import Recommendation from './screens/Recommendation';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -68,6 +69,11 @@ function InsideStack() {
         name='FoodPostList'
         component={FoodPostListScreen}
         options={{ title: 'Food Posts' }}
+      />
+      <Stack.Screen
+        name='Recommendation'
+        component={Recommendation}
+        options={{ title: 'Recommendation' }}
       />
     </Stack.Navigator>
   );
