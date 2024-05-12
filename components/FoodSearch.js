@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { TextInput, Button, View, FlatList, Text, StyleSheet, Image } from 'react-native';
-import { collection, query, where, getDocs, doc } from 'firebase/firestore'; // Import Firestore methods
-import { FIREBASE_FIRESTORE, FIREBASE_AUTH, db } from '../FirebaseConfig';
+import React, { useState, useEffect } from 'react';
+import { TextInput, Button, View, FlatList, Text, StyleSheet, Image, Alert } from 'react-native';
+import { collection, query, where, getDocs, doc } from 'firebase/firestore';
+import { ref, getDownloadURL } from 'firebase/storage'; // Import storage methods
+import { FIREBASE_FIRESTORE, FIREBASE_AUTH, db, FIREBASE_STORAGE } from '../FirebaseConfig';
 import { useNavigation } from '@react-navigation/native';
 
 const auth = FIREBASE_AUTH;
@@ -11,6 +12,10 @@ const FoodSearch = () => {
   const [searchResults, setSearchResults] = useState([]);
   const navigation = useNavigation();
 
+  useEffect(() => {
+    searchFoodPosts();
+  }, []); // Automatically search on initial render
+
   const searchFoodPosts = async () => {
     try {
       const foodQuery = query(
@@ -18,19 +23,48 @@ const FoodSearch = () => {
         where('PostTitle', '>=', searchQuery),
         where('PostTitle', '<=', searchQuery + '\uf8ff')
       );
-
+  
       const querySnapshot = await getDocs(foodQuery);
       const fetchedData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-
-      setSearchResults(fetchedData);
+  
+      if (fetchedData.length > 0) {
+        const firstPost = fetchedData[0]; // Get the first post from the search results
+        const imageURL = await getImageURL(firstPost.PostPhotos); // Fetch the image URL for the first post
+  
+        const postWithImage = { ...firstPost, imageURL }; // Add imageURL to the post object
+  
+        setSearchResults([postWithImage]); // Set search results with the post containing the image
+      } else {
+        setSearchResults([]); // No search results found
+      }
     } catch (error) {
       console.error('Error searching food posts:', error);
     }
   };
-
+  
+  const getImageURL = async (imagePath) => {
+    try {
+      console.log('Image Path:', imagePath);
+  
+      // Check if imagePath is an array and select the first element
+      const path = Array.isArray(imagePath) ? imagePath[0] : imagePath;
+  
+      if (!path) {
+        console.log('Image path is not defined');
+        return null;
+      }
+  
+      const imageRef = ref(FIREBASE_STORAGE, path);
+      return await getDownloadURL(imageRef);
+    } catch (error) {
+      console.error('Error getting image URL:', error);
+      return null;
+    }
+  };
+  
   const currentUser = auth.currentUser;
 
   const isCurrentUserMatched = (postFoodProvider) => {
@@ -44,7 +78,7 @@ const FoodSearch = () => {
         userId: currentUser.uid,
         postId: postId,
       });
-      
+
       Alert.alert('Success', 'Order placed successfully.');
     } catch (error) {
       console.error('Error placing order:', error);
@@ -79,9 +113,7 @@ const FoodSearch = () => {
                 />
               ) : (
                 <Button
-                  onPress={() => {
-                    handleBuy(item.id)
-                  }}
+                  onPress={() => handleBuy(item.id)}
                   title='Buy'
                 />
               )}
