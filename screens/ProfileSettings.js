@@ -3,27 +3,21 @@ import {
   View,
   TextInput,
   Button,
-  ScrollView,
   Text,
-  ActivityIndicator,
+  Image,
   StyleSheet,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import * as ImagePicker from 'expo-image-picker';
-import { ref, uploadBytes } from 'firebase/storage';
-import { useTranslation } from 'react-i18next';
 import Colors from '../constants/colors';
-import { Picker } from '@react-native-picker/picker';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Import getDownloadURL
 
 import { FIREBASE_FIRESTORE, FIREBASE_STORAGE, FIREBASE_AUTH } from '../FirebaseConfig';
 
 const ProfileSettings = ({ navigation }) => {
   const [fullName, setfullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [profilePic, setprofilePic] = useState('');
   const [loading, setLoading] = useState(false);
-  const { t } = useTranslation();
 
   useEffect(() => {
     fetchUserData();
@@ -33,17 +27,16 @@ const ProfileSettings = ({ navigation }) => {
     try {
       const auth = FIREBASE_AUTH;
       const currentUser = auth.currentUser;
-      const uidFromAuthTable = currentUser.uid;
-
-      const usersCollectionRef = collection(FIREBASE_FIRESTORE, 'users');
-      const q = query(usersCollectionRef, where('uid', '==', uidFromAuthTable));
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        const userData = doc.data();
-        setfullName(userData.fullName);
-        setEmail(userData.email);
-        // You can fetch other user data similarly
-      });
+      const uid = currentUser.uid;
+      const docRef = doc(FIREBASE_FIRESTORE, 'users', uid);
+      const docSnap = await getDoc(docRef);
+      const userData = docSnap.data();
+      if (userData) {
+        setfullName(userData.fullName || '');
+        setprofilePic(userData.profilePic); 
+      } else {
+        console.error('User data not found');
+      }
     } catch (error) {
       console.error('Error fetching user data: ', error);
     }
@@ -54,23 +47,11 @@ const ProfileSettings = ({ navigation }) => {
     try {
       const auth = FIREBASE_AUTH;
       const currentUser = auth.currentUser;
-      const uidFromAuthTable = currentUser.uid;
-
-      const usersCollectionRef = collection(FIREBASE_FIRESTORE, 'users');
-      const q = query(usersCollectionRef, where('uid', '==', uidFromAuthTable));
-      const querySnapshot = await getDocs(q);
-
-      querySnapshot.forEach(async (doc) => {
-        try {
-          await updateDoc(doc.ref, { // Corrected this line
-            fullName: fullName,
-            // Add other fields you want to update
-          });
-          alert('Profile updated successfully!');
-        } catch (error) {
-          console.error('Error updating profile: ', error);
-          alert('Failed to update profile');
-        }
+      const uid = currentUser.uid;
+      const docRef = doc(FIREBASE_FIRESTORE, 'users', uid);
+      await updateDoc(docRef, { 
+        fullName: fullName,
+        profilePic: profilePic,
       });
     } catch (error) {
       console.error('Error updating profile: ', error);
@@ -80,28 +61,60 @@ const ProfileSettings = ({ navigation }) => {
     }
   };
 
+  const selectImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        console.error('Permission to access media library was denied');
+        return;
+      }
+  
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+        aspect: [1, 1], // Ensure aspect ratio is 1:1
+        width: 100,
+        height: 100,
+      });
+  
+      if (!result.cancelled) {
+        const selectedImage = result.assets[0];
+        const fileName = selectedImage.uri.substring(
+          selectedImage.uri.lastIndexOf('/') + 1
+        );
+        const storageRef = ref(FIREBASE_STORAGE, 'images/profilepics/' + fileName);
+        const response = await fetch(selectedImage.uri);
+        const blob = await response.blob();
+  
+        uploadBytes(storageRef, blob)
+          .then(async (snapshot) => {
+            console.log('File uploaded successfully');
+            // Get download URL
+            const downloadURL = await getDownloadURL(storageRef);
+            setprofilePic(downloadURL); 
+            console.log('downloadurl: ' + downloadURL);
+          })
+          .catch((error) => {
+            console.error('Error uploading file:', error);
+          });
+      }
+    } catch (error) {
+      console.error('Error selecting image: ', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Profile Settings</Text>
+      {profilePic && <Image source={{ uri: profilePic }} style={styles.image} />}
+      <Button title='Add Profile Picture' onPress={selectImage} />
       <TextInput
         style={styles.input}
-        placeholder="fullName"
+        placeholder="Full Name"
         value={fullName}
         onChangeText={(text) => setfullName(text)}
       />
-      {/* <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={(text) => setEmail(text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry={true}
-        value={password}
-        onChangeText={(text) => setPassword(text)}
-      /> */}
       <Button
         title={loading ? 'Updating...' : 'Update Profile'}
         onPress={updateProfile}
@@ -130,6 +143,12 @@ const styles = StyleSheet.create({
     borderColor: Colors.lightGray,
     borderRadius: 5,
     marginBottom: 20,
+  },
+  image: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginVertical: 20,
   },
 });
 
