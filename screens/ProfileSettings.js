@@ -20,27 +20,26 @@ const ProfileSettings = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const auth = FIREBASE_AUTH;
+        const currentUser = auth.currentUser;
+        const uid = currentUser.uid;
+        const docRef = doc(FIREBASE_FIRESTORE, 'users', uid);
+        const docSnap = await getDoc(docRef);
+        const userData = docSnap.data();
+        if (userData) {
+          setfullName(userData.fullName || '');
+          setprofilePic(userData.profilePic); 
+        } else {
+          console.error('User data not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data: ', error);
+      }
+    };
     fetchUserData();
   }, []);
-
-  const fetchUserData = async () => {
-    try {
-      const auth = FIREBASE_AUTH;
-      const currentUser = auth.currentUser;
-      const uid = currentUser.uid;
-      const docRef = doc(FIREBASE_FIRESTORE, 'users', uid);
-      const docSnap = await getDoc(docRef);
-      const userData = docSnap.data();
-      if (userData) {
-        setfullName(userData.fullName || '');
-        setprofilePic(userData.profilePic); 
-      } else {
-        console.error('User data not found');
-      }
-    } catch (error) {
-      console.error('Error fetching user data: ', error);
-    }
-  };
 
   const updateProfile = async () => {
     setLoading(true);
@@ -68,7 +67,7 @@ const ProfileSettings = ({ navigation }) => {
         console.error('Permission to access media library was denied');
         return;
       }
-  
+
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -77,7 +76,7 @@ const ProfileSettings = ({ navigation }) => {
         width: 100,
         height: 100,
       });
-  
+
       if (!result.cancelled) {
         const selectedImage = result.assets[0];
         const fileName = selectedImage.uri.substring(
@@ -86,14 +85,13 @@ const ProfileSettings = ({ navigation }) => {
         const storageRef = ref(FIREBASE_STORAGE, 'images/profilepics/' + fileName);
         const response = await fetch(selectedImage.uri);
         const blob = await response.blob();
-  
+
         uploadBytes(storageRef, blob)
           .then(async (snapshot) => {
             console.log('File uploaded successfully');
             // Get download URL
             const downloadURL = await getDownloadURL(storageRef);
-            setprofilePic(downloadURL); 
-            console.log('downloadurl: ' + downloadURL);
+            setprofilePic(downloadURL);
           })
           .catch((error) => {
             console.error('Error uploading file:', error);
@@ -108,7 +106,7 @@ const ProfileSettings = ({ navigation }) => {
     <View style={styles.container}>
       <Text style={styles.heading}>Profile Settings</Text>
       {profilePic && <Image source={{ uri: profilePic }} style={styles.image} />}
-      <Button title='Add Profile Picture' onPress={selectImage} />
+      <Button title='Choose Profile Picture' onPress={selectImage} />
       <TextInput
         style={styles.input}
         placeholder="Full Name"
