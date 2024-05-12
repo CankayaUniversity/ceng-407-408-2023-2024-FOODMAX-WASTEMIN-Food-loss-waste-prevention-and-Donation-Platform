@@ -102,6 +102,10 @@ function Home({ navigation }) {
           onPress={() => navigation.navigate('FoodPostList')}
           title='Open Food Post List'
         />
+        <Button
+          onPress={() => navigation.navigate('Recommendation')}
+          title='Recommendation'
+        />
       </View>
     </ScrollView>
   );
