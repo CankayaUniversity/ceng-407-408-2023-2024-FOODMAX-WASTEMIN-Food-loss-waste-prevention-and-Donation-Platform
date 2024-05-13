@@ -229,10 +229,6 @@ function FoodPost() {
             title='Pick an image from camera roll'
             onPress={selectImage}
           />
-
-          {/* <Text>Press on map to pick a pickup spot:</Text>
-          <GoogleMapView onSelectSpot={handleSelectSpot} /> */}
-
           <TextInput
             value={FoodPostQuantity}
             placeholder='Quantity'
