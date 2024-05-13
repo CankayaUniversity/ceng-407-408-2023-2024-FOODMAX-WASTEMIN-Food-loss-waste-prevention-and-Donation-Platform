@@ -21,7 +21,6 @@ import {
 import { collection, addDoc, doc, setDoc, Timestamp } from 'firebase/firestore';
 import GoogleMapView from '../components/GoogleMapView';
 
-
 import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes } from 'firebase/storage';
 
@@ -37,7 +36,6 @@ function FoodPost({ navigation }) {
   const [FoodPostExipry, setFoodPostExipry] = useState(new Date());
   const [selectedSpot, setSelectedSpot] = useState(null);
 
-  
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
@@ -49,7 +47,6 @@ function FoodPost({ navigation }) {
   const handleSelectSpot = (spot) => {
     setSelectedSpot(spot);
   };
-
 
   const createFoodPost = async () => {
     setLoading(true);
@@ -226,8 +223,8 @@ function FoodPost({ navigation }) {
             onPress={selectImage}
           />
 
-           <Text>Press on map to pick a pickup spot:</Text>
-           <GoogleMapView onSelectSpot={handleSelectSpot} />
+          <Text>Press on map to pick a pickup spot:</Text>
+          <GoogleMapView onSelectSpot={handleSelectSpot} />
 
           <TextInput
             value={FoodPostQuantity}
@@ -347,7 +344,7 @@ function FoodPost({ navigation }) {
               ></Button>
               <Button
                 title='Back'
-                onPress={() => navigation.navigate('HomeScreen')}
+                onPress={() => navigation.navigate('MyStoreScreen')}
               ></Button>
             </>
           )}

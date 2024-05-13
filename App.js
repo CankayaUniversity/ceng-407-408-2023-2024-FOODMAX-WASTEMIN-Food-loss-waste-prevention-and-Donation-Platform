@@ -56,11 +56,6 @@ function InsideStack() {
         options={{ title: 'Home' }}
       />
       <Stack.Screen
-        name='FoodPost'
-        component={FoodPost}
-        options={{ title: 'Foods' }}
-      />
-      <Stack.Screen
         name='FoodPostEdit'
         component={FoodPostEdit}
         options={{ title: 'Edit Food' }}
@@ -101,6 +96,11 @@ function SettingsStack() {
         name='MyStoreScreen'
         component={StoreSettings}
         options={{ title: 'Store Settings' }}
+      />
+      <Stack.Screen
+        name='FoodPost'
+        component={FoodPost}
+        options={{ title: 'Foods' }}
       />
     </Stack.Navigator>
   );

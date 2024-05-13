@@ -116,6 +116,7 @@ const StoreLogin = () => {
       );
       if (!storeQuerySnapshot.empty) {
         Alert.alert('Error', 'You have already registered a store.');
+        navigation.navigate('SettingsScreen');
         return;
       }
 
