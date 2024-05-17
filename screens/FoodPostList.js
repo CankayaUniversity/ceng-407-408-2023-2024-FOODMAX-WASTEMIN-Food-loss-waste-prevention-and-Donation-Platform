@@ -4,11 +4,13 @@ import { useFocusEffect } from '@react-navigation/native';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FIREBASE_FIRESTORE } from '../FirebaseConfig';
 import FoodItem from '../components/FoodItem';
-import FoodSearch from '../components/FoodSearch'; 
+import FoodSearch from '../components/FoodSearch';
+import AllergyFilter from '../components/AllergyFilter';
 
 function FoodPostList() {
   const [foodItems, setFoodItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAllergies, setSelectedAllergies] = useState([]);
 
   const fetchData = async () => {
     try {
@@ -23,7 +25,7 @@ function FoodPostList() {
         id: doc.id,
         ...doc.data(),
       }));
-      setFoodItems([...fetchedData]); 
+      setFoodItems([...fetchedData]);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -31,19 +33,34 @@ function FoodPostList() {
 
   useEffect(() => {
     fetchData();
-  }, [searchQuery]); 
+  }, [searchQuery]);
 
   useFocusEffect(
     useCallback(() => {
       fetchData();
-    }, [searchQuery]) 
+    }, [searchQuery])
   );
+
+  const filterFoodItems = (selectedAllergies) => {
+    const filteredItems = foodItems.filter((item) => {
+      return selectedAllergies.some((allergy) =>
+        item.PostAllergyWarning.includes(allergy)
+      );
+    });
+    setFoodItems(filteredItems);
+  };
 
   const renderItem = ({ item }) => <FoodItem data={item} />;
 
   return (
     <View>
       <FoodSearch setSearchQuery={setSearchQuery} />
+      {/* BLOCKS THE PAGE PLEASE DONT MERGE IT UNLESS IT IS WORKING !! */}
+      {/* <AllergyFilter
+        selectedAllergies={selectedAllergies}
+        setSelectedAllergies={setSelectedAllergies}
+        filterFoodItems={filterFoodItems}
+      /> */}
       <FlatList
         data={foodItems}
         renderItem={renderItem}

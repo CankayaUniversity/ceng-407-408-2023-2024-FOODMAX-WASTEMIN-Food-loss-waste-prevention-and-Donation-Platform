@@ -95,10 +95,6 @@ function Home({ navigation }) {
       {/* put these temporarily here */}
       <View style={styles.button}>
         <Button
-          onPress={() => navigation.navigate('FoodPost')}
-          title='Create Food Post'
-        />
-        <Button
           onPress={() => navigation.navigate('FoodPostList')}
           title='Open Food Post List'
         />

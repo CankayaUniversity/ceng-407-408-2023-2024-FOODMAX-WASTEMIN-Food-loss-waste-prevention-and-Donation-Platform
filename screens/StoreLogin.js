@@ -34,7 +34,6 @@ const StoreLogin = () => {
   const { location, setLocation } = useContext(UserLocationContext);
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
-  const [foodItems, setFoodItems] = useState([]);
 
   const firestore = FIREBASE_FIRESTORE;
   const auth = FIREBASE_AUTH;
@@ -51,7 +50,6 @@ const StoreLogin = () => {
 
   useEffect(() => {
     // fetchData();
-    fetchFoods();
   }, []);
 
   const handleMapPress = (event) => {
@@ -95,17 +93,6 @@ const StoreLogin = () => {
     }
   };
 
-  const fetchFoods = async () => {
-    const foodPostsRef = collection(FIREBASE_FIRESTORE, 'FoodPost');
-    const q = query(foodPostsRef, where('PostFoodProvider', '==', user.uid));
-    const querySnapshot = await getDocs(q);
-    const fetchedData = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setFoodItems(fetchedData);
-  };
-
   const addStoreCollection = async () => {
     try {
       const storeQuerySnapshot = await getDocs(
@@ -115,7 +102,11 @@ const StoreLogin = () => {
         )
       );
       if (!storeQuerySnapshot.empty) {
-        Alert.alert('Error', 'You have already registered a store.');
+        Alert.alert(
+          'Error',
+          'You have already registered a store. Please create another account to register a new store.'
+        );
+        navigation.navigate('SettingsScreen');
         return;
       }
 
@@ -127,7 +118,7 @@ const StoreLogin = () => {
         name: name,
         address: address,
         owner: doc(FIREBASE_FIRESTORE, `/users/${user.uid}`),
-        products: foodItems,
+        products: [],
       });
 
       Alert.alert('Success', 'Store collection document added successfully!');
@@ -184,7 +175,11 @@ const StoreLogin = () => {
           value={description}
           onChangeText={setDescription}
         />
-        <Button title='Add Store' onPress={addStoreCollection} />
+        <Button
+          title='Add Store'
+          onPress={addStoreCollection}
+          disabled={!address}
+        />
       </View>
     </View>
   );

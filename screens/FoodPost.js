@@ -5,7 +5,6 @@ import {
   TextInput,
   Button,
   ActivityIndicator,
-  Image,
   ScrollView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -18,14 +17,24 @@ import {
   FIREBASE_FIRESTORE,
   FIREBASE_STORAGE,
 } from '../FirebaseConfig';
-import { collection, addDoc, doc, setDoc, Timestamp } from 'firebase/firestore';
-import GoogleMapView from '../components/GoogleMapView';
-
-
+import {
+  collection,
+  addDoc,
+  doc,
+  setDoc,
+  Timestamp,
+  updateDoc,
+  arrayUnion,
+} from 'firebase/firestore';
 import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes } from 'firebase/storage';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
-function FoodPost({ navigation }) {
+function FoodPost() {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const storeId = route.params.storeId;
+
   const [FoodPostAvailability, setFoodPostAvailability] = useState('');
   const [FoodPostTitle, setFoodPostTitle] = useState('');
   const [FoodPostDescription, setFoodPostDescription] = useState('');
@@ -35,21 +44,14 @@ function FoodPost({ navigation }) {
   const [FoodPostPhotos, setFoodPostPhotos] = useState([]);
   const [FoodPostAllergyWarning, setFoodPostAllergyWarning] = useState([]);
   const [FoodPostExipry, setFoodPostExipry] = useState(new Date());
-  const [selectedSpot, setSelectedSpot] = useState(null);
-
-  
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const { t } = useTranslation();
   const auth = FIREBASE_AUTH;
   const firestore = FIREBASE_FIRESTORE;
 
   const foodTypes = ['Produce', 'Pastries', 'Meals', 'Packaged Food'];
-
-  const handleSelectSpot = (spot) => {
-    setSelectedSpot(spot);
-  };
-
 
   const createFoodPost = async () => {
     setLoading(true);
@@ -57,7 +59,6 @@ function FoodPost({ navigation }) {
       const currentUser = auth.currentUser;
       const userDisplayName = currentUser.uid;
 
-      console.log('Selected spot:', selectedSpot);
       const isValidInteger = /^[1-9][0-9]*$/.test(FoodPostQuantity);
       if (!isValidInteger) {
         alert('Quantity must be a valid integer');
@@ -86,7 +87,6 @@ function FoodPost({ navigation }) {
         PostPrice: FoodPostPrice,
         PostFoodProvider: userDisplayName,
         PostPhotos: FoodPostPhotos,
-        PostSelectedSpot: selectedSpot,
       });
 
       // Update the document to set PostId
@@ -95,13 +95,17 @@ function FoodPost({ navigation }) {
         {
           PostId: FoodPostRef.id,
           PostAvailability: 0,
-          PostSelectedSpot: selectedSpot,
         },
         { merge: true }
       ); // Use merge option to update existing document
 
+      const storeRef = doc(firestore, 'Store', storeId);
+      await updateDoc(storeRef, {
+        products: arrayUnion(FoodPostRef),
+      });
+
       alert('Food Post created successfully!');
-      navigation.navigate('FoodPostList');
+      navigation.navigate('MyStoreScreen');
     } catch (error) {
       console.error('Error adding document: ', error);
       alert('Failed to create document. Please try again.');
@@ -225,10 +229,6 @@ function FoodPost({ navigation }) {
             title='Pick an image from camera roll'
             onPress={selectImage}
           />
-
-           <Text>Press on map to pick a pickup spot:</Text>
-           <GoogleMapView onSelectSpot={handleSelectSpot} />
-
           <TextInput
             value={FoodPostQuantity}
             placeholder='Quantity'
@@ -347,7 +347,7 @@ function FoodPost({ navigation }) {
               ></Button>
               <Button
                 title='Back'
-                onPress={() => navigation.navigate('HomeScreen')}
+                onPress={() => navigation.navigate('MyStoreScreen')}
               ></Button>
             </>
           )}

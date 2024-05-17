@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, Button } from 'react-native';
 import { getDownloadURL, ref } from 'firebase/storage';
-import { FIREBASE_STORAGE, FIREBASE_AUTH } from '../FirebaseConfig'; // Assuming FIREBASE_STORAGE contains your Firebase Storage instance
+import { FIREBASE_STORAGE, FIREBASE_AUTH } from '../FirebaseConfig';
 import { useNavigation } from '@react-navigation/native';
 
 const auth = FIREBASE_AUTH;
@@ -54,8 +54,6 @@ const FoodItem = ({ data }) => {
     }
   };
 
-
-
   return (
     <View style={styles.container}>
       {imageURL && <Image source={{ uri: imageURL }} style={styles.image} />}
@@ -74,7 +72,7 @@ const FoodItem = ({ data }) => {
         ) : (
           <Button
             onPress={() => {
-              handleBuy
+              handleBuy;
             }}
             title='Buy'
           />

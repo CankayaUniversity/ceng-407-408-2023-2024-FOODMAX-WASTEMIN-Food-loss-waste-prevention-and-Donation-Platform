@@ -40,6 +40,7 @@ function RegisterScreen({ navigation }) {
         email: email,
         password: password,
         role: 'regular',
+        profilePic: 'https://firebasestorage.googleapis.com/v0/b/nourish-me-8e6b6.appspot.com/o/images%2Fprofilepics%2F06b6cc6f-c50f-44dd-a6ee-75ab6506c1f4.jpeg?alt=media&token=aee502fc-ead3-429f-a16c-310872b9d1ee',
       });
 
       alert('Successfully registered 🎊!');
