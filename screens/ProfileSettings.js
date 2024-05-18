@@ -10,13 +10,15 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import Colors from '../constants/colors';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Import getDownloadURL
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'; 
 
 import { FIREBASE_FIRESTORE, FIREBASE_STORAGE, FIREBASE_AUTH } from '../FirebaseConfig';
 
+const DEFAULT_PROFILE_PIC_URL = 'https://firebasestorage.googleapis.com/v0/b/nourish-me-8e6b6.appspot.com/o/images%2Fprofilepics%2F06b6cc6f-c50f-44dd-a6ee-75ab6506c1f4.jpeg?alt=media&token=aee502fc-ead3-429f-a16c-310872b9d1ee';
+
 const ProfileSettings = ({ navigation }) => {
-  const [fullName, setfullName] = useState('');
-  const [profilePic, setprofilePic] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [profilePic, setProfilePic] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -29,8 +31,8 @@ const ProfileSettings = ({ navigation }) => {
         const docSnap = await getDoc(docRef);
         const userData = docSnap.data();
         if (userData) {
-          setfullName(userData.fullName || '');
-          setprofilePic(userData.profilePic); 
+          setFullName(userData.fullName || '');
+          setProfilePic(userData.profilePic);
         } else {
           console.error('User data not found');
         }
@@ -48,7 +50,7 @@ const ProfileSettings = ({ navigation }) => {
       const currentUser = auth.currentUser;
       const uid = currentUser.uid;
       const docRef = doc(FIREBASE_FIRESTORE, 'users', uid);
-      await updateDoc(docRef, { 
+      await updateDoc(docRef, {
         fullName: fullName,
         profilePic: profilePic,
       });
@@ -73,11 +75,9 @@ const ProfileSettings = ({ navigation }) => {
         allowsEditing: true,
         quality: 1,
         aspect: [1, 1], // Ensure aspect ratio is 1:1
-        width: 100,
-        height: 100,
       });
 
-      if (!result.cancelled) {
+      if (!result.cancelled && result.assets && result.assets.length > 0) {
         const selectedImage = result.assets[0];
         const fileName = selectedImage.uri.substring(
           selectedImage.uri.lastIndexOf('/') + 1
@@ -86,12 +86,28 @@ const ProfileSettings = ({ navigation }) => {
         const response = await fetch(selectedImage.uri);
         const blob = await response.blob();
 
+      
+        if (profilePic && profilePic !== DEFAULT_PROFILE_PIC_URL) {
+          const prevFileName = profilePic.substring(profilePic.lastIndexOf('%2F') + 3, profilePic.lastIndexOf('?'));
+          const prevStorageRef = ref(FIREBASE_STORAGE, 'images/profilepics/' + prevFileName);
+
+          deleteObject(prevStorageRef)
+            .then(() => {
+              console.log('Previous profile picture deleted successfully');
+            })
+            .catch((error) => {
+              console.error('Error deleting previous profile picture:', error);
+            });
+        }
+
+        
         uploadBytes(storageRef, blob)
           .then(async (snapshot) => {
             console.log('File uploaded successfully');
             // Get download URL
             const downloadURL = await getDownloadURL(storageRef);
-            setprofilePic(downloadURL);
+            setProfilePic(downloadURL);
+            console.log('downloadURL' + downloadURL);
           })
           .catch((error) => {
             console.error('Error uploading file:', error);
@@ -111,7 +127,7 @@ const ProfileSettings = ({ navigation }) => {
         style={styles.input}
         placeholder="Full Name"
         value={fullName}
-        onChangeText={(text) => setfullName(text)}
+        onChangeText={(text) => setFullName(text)}
       />
       <Button
         title={loading ? 'Updating...' : 'Update Profile'}
