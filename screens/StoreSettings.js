@@ -1,4 +1,12 @@
-import { View, Button, Text, ActivityIndicator, FlatList } from 'react-native';
+import {
+  View,
+  Button,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+  FlatList,
+  Image,
+} from 'react-native';
 import React, { useCallback, useState } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import {
@@ -10,6 +18,8 @@ import {
   getDoc,
 } from 'firebase/firestore';
 import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../FirebaseConfig';
+import Colors from '../constants/colors';
+import ProductItem from '../components/ProductItem';
 
 const StoreSettings = () => {
   const navigation = useNavigation();
@@ -77,31 +87,30 @@ const StoreSettings = () => {
       {loading ? (
         <ActivityIndicator size='large' color='#0000ff' />
       ) : store ? (
-        <View>
-          <Text>My Store</Text>
+        <View style={styles.container}>
+          <Image
+            style={styles.logo}
+            source={{
+              uri: store.logo,
+            }}
+          />
           <Text>Store name: {store.name}</Text>
           <Text>Store description: {store.description}</Text>
           <Text>Store category: {store.category}</Text>
           <Text>Store address: {store.address}</Text>
+          <Text style={styles.titleText}>Available products</Text>
           {products && (
             <FlatList
               data={products}
               keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
-                <View>
-                  <Text>Product Name: {item.PostTitle}</Text>
-                  <Text>Description: {item.PostDescription}</Text>
-                  <Text>Price: ${item.PostPrice}</Text>
-                </View>
-              )}
+              renderItem={({ item }) => <ProductItem product={item} />}
             />
           )}
-
           <Button
             onPress={() =>
               navigation.navigate('FoodPost', { storeId: store.id })
             }
-            title='Create a food item'
+            title='Create a new food item'
           />
         </View>
       ) : (
@@ -112,3 +121,21 @@ const StoreSettings = () => {
 };
 
 export default StoreSettings;
+
+const styles = StyleSheet.create({
+  container: {
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    gap: 8,
+  },
+  titleText: {
+    fontWeight: 'bold',
+    textTransform: 'capitalize',
+    color: Colors.navy,
+  },
+  logo: {
+    width: 50,
+    height: 50,
+  },
+});

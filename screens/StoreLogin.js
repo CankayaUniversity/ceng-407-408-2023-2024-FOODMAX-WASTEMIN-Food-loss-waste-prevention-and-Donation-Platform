@@ -18,12 +18,18 @@ import {
   query,
   where,
 } from 'firebase/firestore';
-import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../FirebaseConfig';
+import {
+  FIREBASE_FIRESTORE,
+  FIREBASE_AUTH,
+  FIREBASE_STORAGE,
+} from '../FirebaseConfig';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { UserLocationContext } from '../src/context/UserLocationContext';
 import GlobalApi from '../src/services/GlobalApi';
 import Colors from '../constants/colors';
 import { useNavigation } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const StoreLogin = () => {
   const [category, setCategory] = useState('');
@@ -32,10 +38,12 @@ const StoreLogin = () => {
   const [name, setName] = useState('');
   const [selectedLocation, setSelectedLocation] = useState(null);
   const { location, setLocation } = useContext(UserLocationContext);
+  const [loc, setLoc] = useState('');
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
 
   const firestore = FIREBASE_FIRESTORE;
+  const storage = FIREBASE_STORAGE;
   const auth = FIREBASE_AUTH;
   const user = auth.currentUser;
 
@@ -50,6 +58,13 @@ const StoreLogin = () => {
 
   useEffect(() => {
     // fetchData();
+    (async () => {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Sorry, we need camera roll permissions to make this work!');
+      }
+    })();
   }, []);
 
   const handleMapPress = (event) => {
@@ -57,6 +72,7 @@ const StoreLogin = () => {
     if (coordinate) {
       setSelectedLocation(coordinate);
       getAddress(coordinate);
+      setLoc(coordinate);
     } else {
       console.error('Invalid coordinate:', coordinate);
     }
@@ -73,6 +89,33 @@ const StoreLogin = () => {
         .catch((error) => {
           console.error('Error fetching geocode:', error);
         });
+    }
+  };
+
+  const selectImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        const imageUri = result.assets[0].uri;
+
+        const filename = imageUri.substring(imageUri.lastIndexOf('/') + 1);
+        const storageRef = ref(storage, `logos/${filename}`);
+
+        const response = await fetch(imageUri);
+        const blob = await response.blob();
+
+        await uploadBytes(storageRef, blob);
+        const downloadUrl = await getDownloadURL(storageRef);
+
+        setLogo(downloadUrl);
+      }
+    } catch (error) {
+      console.error('Error picking image: ', error);
     }
   };
 
@@ -119,11 +162,13 @@ const StoreLogin = () => {
         address: address,
         owner: doc(FIREBASE_FIRESTORE, `/users/${user.uid}`),
         products: [],
+        location: {
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+        },
       });
 
       Alert.alert('Success', 'Store collection document added successfully!');
-
-      // Clear input fields
       setLogo('');
       setName('');
       setAddress('');
@@ -163,7 +208,7 @@ const StoreLogin = () => {
         )}
       </View>
       <View style={styles.bottomContainer}>
-        <TextInput placeholder='Logo URL' value={logo} onChangeText={setLogo} />
+        <Button title='Pick an image from camera roll' onPress={selectImage} />
         <TextInput placeholder='Name' value={name} onChangeText={setName} />
         <TextInput
           placeholder='Category'
