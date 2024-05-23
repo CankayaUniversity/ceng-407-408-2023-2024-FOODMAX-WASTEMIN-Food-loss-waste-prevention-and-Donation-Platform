@@ -11,10 +11,12 @@ function FoodPostList() {
   const [foodItems, setFoodItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAllergies, setSelectedAllergies] = useState([]);
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
 
   const fetchData = async () => {
     try {
-      let foodQuery = query(collection(FIREBASE_FIRESTORE, 'FoodPost'));
+      console.log("Fetching data...");
+      let foodQuery = collection(FIREBASE_FIRESTORE, 'FoodPost');
 
       if (searchQuery) {
         foodQuery = query(foodQuery, where('PostTitle', '>=', searchQuery));
@@ -25,7 +27,20 @@ function FoodPostList() {
         id: doc.id,
         ...doc.data(),
       }));
-      setFoodItems([...fetchedData]);
+      
+      console.log("Number of fetched items:", fetchedData.length);
+      console.log("Fetched Data:", fetchedData);
+
+      let filteredItems = fetchedData;
+
+      // Apply allergy filter if selected allergies are present
+      if (selectedAllergies.length > 0) {
+        filteredItems = fetchedData.filter(item =>
+          selectedAllergies.some(allergy => item.PostAllergyWarning.includes(allergy))
+        );
+      }
+      console.log("Filtered Items:", filteredItems);
+      setFoodItems(filteredItems.length > 0 ? filteredItems : fetchedData);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -33,21 +48,20 @@ function FoodPostList() {
 
   useEffect(() => {
     fetchData();
-  }, [searchQuery]);
+  }, [searchQuery, selectedAllergies]);
 
   useFocusEffect(
     useCallback(() => {
       fetchData();
-    }, [searchQuery])
+    }, [searchQuery, selectedAllergies])
   );
 
-  const filterFoodItems = (selectedAllergies) => {
-    const filteredItems = foodItems.filter((item) => {
-      return selectedAllergies.some((allergy) =>
-        item.PostAllergyWarning.includes(allergy)
-      );
-    });
-    setFoodItems(filteredItems);
+  const handleAllergyWarningPress = (allergy) => {
+    setSelectedAllergies(prevAllergies =>
+      prevAllergies.includes(allergy)
+        ? prevAllergies.filter(item => item !== allergy)
+        : [...prevAllergies, allergy]
+    );
   };
 
   const renderItem = ({ item }) => <FoodItem data={item} />;
@@ -55,12 +69,12 @@ function FoodPostList() {
   return (
     <View>
       <FoodSearch setSearchQuery={setSearchQuery} />
-      {/* BLOCKS THE PAGE PLEASE DONT MERGE IT UNLESS IT IS WORKING !! */}
-      {/* <AllergyFilter
+      { <AllergyFilter
+        visible={isFilterVisible}
+        onClose={() => setIsFilterVisible(false)}
         selectedAllergies={selectedAllergies}
-        setSelectedAllergies={setSelectedAllergies}
-        filterFoodItems={filterFoodItems}
-      /> */}
+        handleAllergyWarningPress={handleAllergyWarningPress}
+      /> }
       <FlatList
         data={foodItems}
         renderItem={renderItem}

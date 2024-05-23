@@ -23,7 +23,7 @@ const FoodSearch = () => {
       );
   
       if (selectedAllergies.length > 0) {
-        foodQuery = query(foodQuery, where('allergyWarnings', 'array-contains-any', selectedAllergies));
+        foodQuery = query(foodQuery, where('PostAllergyWarning', 'array-contains-any', selectedAllergies));
       }
   
       const querySnapshot = await getDocs(foodQuery);
@@ -42,10 +42,9 @@ const FoodSearch = () => {
     setFilterModalVisible(!filterModalVisible); 
   };
   
-  const handleApplyFilter = () => {
-    //searchFoodPosts();
-    console.log("Current value of filterModalVisible:", filterModalVisible);
-    toggleFilterModal();
+  const handleApplyFilter = (selectedAllergies) => {
+    setSelectedAllergies(selectedAllergies);
+    toggleFilterModal(); // Close the modal after applying the filter
   };
 
   const handleAllergyWarningPress = (allergy) => {
