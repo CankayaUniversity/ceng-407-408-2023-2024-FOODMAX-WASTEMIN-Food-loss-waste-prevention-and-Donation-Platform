@@ -7,6 +7,7 @@ import {
   Image,
   StyleSheet,
   Alert,
+  Switch,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import Colors from '../constants/colors';
@@ -20,6 +21,12 @@ const ProfileSettings = ({ navigation }) => {
   const [fullName, setFullName] = useState('');
   const [profilePic, setProfilePic] = useState('');
   const [loading, setLoading] = useState(false);
+  const [preferences, setPreferences] = useState({
+    glutenFree: false,
+    dairyFree: false,
+    vegan: false,
+    vegetarian: false,
+  });
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -33,6 +40,7 @@ const ProfileSettings = ({ navigation }) => {
         if (userData) {
           setFullName(userData.fullName || '');
           setProfilePic(userData.profilePic);
+          setPreferences(userData.preferences || {});
         } else {
           console.error('User data not found');
         }
@@ -53,6 +61,7 @@ const ProfileSettings = ({ navigation }) => {
       await updateDoc(docRef, {
         fullName: fullName,
         profilePic: profilePic,
+        preferences: preferences,
       });
     } catch (error) {
       console.error('Error updating profile: ', error);
@@ -60,6 +69,13 @@ const ProfileSettings = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const togglePreference = (preference) => {
+    setPreferences((prevPreferences) => ({
+      ...prevPreferences,
+      [preference]: !prevPreferences[preference],
+    }));
   };
 
   const selectImage = async () => {
@@ -155,26 +171,65 @@ const ProfileSettings = ({ navigation }) => {
     <View style={styles.container}>
       <Text style={styles.heading}>Profile Settings</Text>
       {profilePic && <Image source={{ uri: profilePic }} style={styles.image} />}
-      <Button title='Choose Profile Picture' onPress={selectImage} />
-      <TextInput
-        style={styles.input}
-        placeholder="Full Name"
-        value={fullName}
-        onChangeText={(text) => setFullName(text)}
-      />
-      <Button
-        title={loading ? 'Updating...' : 'Update Profile'}
-        onPress={updateProfile}
-        disabled={loading}
-      />
-      <Button
-        title="Delete Account"
-        onPress={confirmDeleteUser}
-        color="red"
-      />
+      <View style={styles.buttonContainer}>
+        <Button title='Choose Profile Picture' onPress={selectImage} />
+      </View>
+      <Text style={styles.simpletext}>Update Username:</Text>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Full Name"
+          value={fullName}
+          onChangeText={(text) => setFullName(text)}
+        />
+      </View>
+      <Text style={styles.simpletext}>Set Preferences:</Text>
+      <View style={styles.preferenceContainer}>
+        <Text style={styles.preferenceText}>Gluten-Free</Text>
+        <Switch
+          value={preferences.glutenFree}
+          onValueChange={() => togglePreference('glutenFree')}
+        />
+      </View>
+      <View style={styles.preferenceContainer}>
+        <Text style={styles.preferenceText}>Dairy-Free</Text>
+        <Switch
+          value={preferences.dairyFree}
+          onValueChange={() => togglePreference('dairyFree')}
+        />
+      </View>
+      <View style={styles.preferenceContainer}>
+        <Text style={styles.preferenceText}>Vegan</Text>
+        <Switch
+          value={preferences.vegan}
+          onValueChange={() => togglePreference('vegan')}
+        />
+      </View>
+      <View style={styles.preferenceContainer}>
+        <Text style={styles.preferenceText}>Vegetarian</Text>
+        <Switch
+          value={preferences.vegetarian}
+          onValueChange={() => togglePreference('vegetarian')}
+        />
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button
+          title={loading ? 'Updating...' : 'Update Profile'}
+          onPress={updateProfile}
+          disabled={loading}
+        />
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Delete Account"
+          onPress={confirmDeleteUser}
+          color="red"
+        />
+      </View>
     </View>
   );
-};
+  
+};  
 
 const styles = StyleSheet.create({
   container: {
@@ -182,19 +237,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.cream,
+    padding: 20,
   },
   heading: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
   },
-  input: {
+  simpletext: {
+    fontSize: 14,
+    marginBottom: 20,
+    textAlign: 'left',
+  },
+  buttonContainer: {
     width: '80%',
+    marginBottom: 10,
+  },
+  inputContainer: {
+    width: '80%',
+    marginBottom: 20,
+  },
+  input: {
+    width: '100%',
     padding: 10,
     borderWidth: 1,
     borderColor: Colors.lightGray,
     borderRadius: 5,
-    marginBottom: 20,
   },
   image: {
     width: 100,
@@ -202,6 +270,18 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginVertical: 20,
   },
+  preferenceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '80%',
+    marginBottom: 10,
+  },
+  preferenceText: {
+    fontSize: 16,
+  },
 });
+
+
 
 export default ProfileSettings;
