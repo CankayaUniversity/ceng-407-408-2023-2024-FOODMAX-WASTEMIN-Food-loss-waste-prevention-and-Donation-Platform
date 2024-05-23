@@ -43,6 +43,7 @@ function AuthStack() {
         component={RegisterScreen}
         options={{ headerShown: false }}
       />
+
     </Stack.Navigator>
   );
 }

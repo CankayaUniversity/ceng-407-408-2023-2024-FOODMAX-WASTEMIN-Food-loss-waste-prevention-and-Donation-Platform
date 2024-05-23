@@ -6,12 +6,12 @@ import {
   Text,
   Image,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import Colors from '../constants/colors';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'; 
-
 import { FIREBASE_FIRESTORE, FIREBASE_STORAGE, FIREBASE_AUTH } from '../FirebaseConfig';
 
 const DEFAULT_PROFILE_PIC_URL = 'https://firebasestorage.googleapis.com/v0/b/nourish-me-8e6b6.appspot.com/o/images%2Fprofilepics%2F06b6cc6f-c50f-44dd-a6ee-75ab6506c1f4.jpeg?alt=media&token=aee502fc-ead3-429f-a16c-310872b9d1ee';
@@ -86,7 +86,6 @@ const ProfileSettings = ({ navigation }) => {
         const response = await fetch(selectedImage.uri);
         const blob = await response.blob();
 
-      
         if (profilePic && profilePic !== DEFAULT_PROFILE_PIC_URL) {
           const prevFileName = profilePic.substring(profilePic.lastIndexOf('%2F') + 3, profilePic.lastIndexOf('?'));
           const prevStorageRef = ref(FIREBASE_STORAGE, 'images/profilepics/' + prevFileName);
@@ -100,7 +99,6 @@ const ProfileSettings = ({ navigation }) => {
             });
         }
 
-        
         uploadBytes(storageRef, blob)
           .then(async (snapshot) => {
             console.log('File uploaded successfully');
@@ -118,6 +116,41 @@ const ProfileSettings = ({ navigation }) => {
     }
   };
 
+  const deleteUser = async () => {
+    try {
+      const auth = FIREBASE_AUTH;
+      const currentUser = auth.currentUser;
+      const uid = currentUser.uid;
+
+      if (profilePic && profilePic !== DEFAULT_PROFILE_PIC_URL) {
+        const fileName = profilePic.substring(profilePic.lastIndexOf('%2F') + 3, profilePic.lastIndexOf('?'));
+        const storageRef = ref(FIREBASE_STORAGE, 'images/profilepics/' + fileName);
+
+        await deleteObject(storageRef);
+        console.log('Profile picture deleted successfully');
+      }
+
+      await deleteDoc(doc(FIREBASE_FIRESTORE, 'users', uid));
+      await currentUser.delete();
+
+      
+    } catch (error) {
+      console.error('Error deleting user: ', error);
+      alert('Failed to delete user');
+    }
+  };
+
+  const confirmDeleteUser = () => {
+    Alert.alert(
+      'Delete Account',
+      'Are you sure you want to delete your account? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: deleteUser },
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Profile Settings</Text>
@@ -133,6 +166,11 @@ const ProfileSettings = ({ navigation }) => {
         title={loading ? 'Updating...' : 'Update Profile'}
         onPress={updateProfile}
         disabled={loading}
+      />
+      <Button
+        title="Delete Account"
+        onPress={confirmDeleteUser}
+        color="red"
       />
     </View>
   );
