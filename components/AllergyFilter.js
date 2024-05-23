@@ -2,6 +2,11 @@ import React from 'react';
 import { Modal, View, Text, Button, TouchableOpacity, StyleSheet } from 'react-native';
 
 const AllergyFilter = ({ visible, onClose, onApplyFilter, selectedAllergies, handleAllergyWarningPress }) => {
+  const applyFilter = () => {
+    onApplyFilter(selectedAllergies);
+    onClose(); 
+  };
+
   return (
     <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
       <View style={styles.modalContainer}>
@@ -31,7 +36,7 @@ const AllergyFilter = ({ visible, onClose, onApplyFilter, selectedAllergies, han
           >
             <Text>Vegetarian</Text>
           </TouchableOpacity>
-          <Button title="Apply Filter" onPress={onClose} />
+          <Button title="Apply Filter" onPress={applyFilter} />
         </View>
       </View>
     </Modal>
