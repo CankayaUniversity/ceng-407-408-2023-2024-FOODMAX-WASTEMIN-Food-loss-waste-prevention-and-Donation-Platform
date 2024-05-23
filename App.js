@@ -121,8 +121,6 @@ export default function App() {
   });
 
   useEffect(() => {
-    fetchData();
-
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -134,18 +132,6 @@ export default function App() {
       setLocation(location);
     })();
   }, []);
-
-  const fetchData = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/data');
-
-      setData(response.data.message);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  console.log(data);
 
   // TODO: Use it later
   // const changeLanguage = () => {
