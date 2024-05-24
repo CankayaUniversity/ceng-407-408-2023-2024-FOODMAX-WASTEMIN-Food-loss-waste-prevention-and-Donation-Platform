@@ -4,7 +4,6 @@ import { Modal, View, Text, Button, TouchableOpacity, StyleSheet } from 'react-n
 const AllergyFilter = ({ visible, onClose, onApplyFilter, selectedAllergies, handleAllergyWarningPress }) => {
   const applyFilter = () => {
     onApplyFilter(selectedAllergies);
-    onClose(); 
   };
 
   return (
