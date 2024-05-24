@@ -20,7 +20,7 @@ import {
 import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../FirebaseConfig';
 import Colors from '../constants/colors';
 import ProductItem from '../components/ProductItem';
-
+ 
 const StoreSettings = () => {
   const navigation = useNavigation();
   const firestore = FIREBASE_FIRESTORE;
@@ -94,10 +94,20 @@ const StoreSettings = () => {
               uri: store.logo,
             }}
           />
-          <Text>Store name: {store.name}</Text>
-          <Text>Store description: {store.description}</Text>
-          <Text>Store category: {store.category}</Text>
-          <Text>Store address: {store.address}</Text>
+          <View style={styles.containertext}>
+          <Text style={styles.destext}>Store name: <Text style={styles.text}>{store.name}</Text> </Text>
+          <Text style={styles.destext}>Store description: <Text style={styles.text}> {store.description}</Text> </Text>
+          <Text style={styles.destext}>Store category: <Text style={styles.text}> {store.category}</Text> </Text>
+          <Text style={styles.destext}>Store address: <Text style={styles.text}> {store.address}</Text> </Text>
+          </View>
+
+          <Button
+            onPress={() =>
+              navigation.navigate('StoreSettingsEdit', { storeId: store.id })
+            }
+            title='Update Store Settings'
+          />
+
           <Text style={styles.titleText}>Available products</Text>
           {products && (
             <FlatList
@@ -129,13 +139,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  containertext: {
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    alignItems: 'left',
+    gap: 8,
+  },
   titleText: {
     fontWeight: 'bold',
     textTransform: 'capitalize',
     color: Colors.navy,
   },
+  destext: {
+    fontWeight: 'bold',
+    color: Colors.navy,
+  },
+  text: {
+    fontWeight: 'normal',
+    color: Colors.black,
+  },
   logo: {
-    width: 50,
-    height: 50,
+    width: 100,
+    height: 100,
   },
 });
