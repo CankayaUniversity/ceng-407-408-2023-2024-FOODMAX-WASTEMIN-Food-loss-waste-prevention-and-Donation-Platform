@@ -25,6 +25,8 @@ import { useFonts } from 'expo-font';
 import ProfileSettings from './screens/ProfileSettings';
 import StoreLogin from './screens/StoreLogin';
 import StoreSettings from './screens/StoreSettings';
+import StoreSettingsEdit from './screens/StoreSettingsEdit';
+
 import Recommendation from './screens/Recommendation';
 
 const Stack = createNativeStackNavigator();
@@ -97,6 +99,11 @@ function SettingsStack() {
         name='MyStoreScreen'
         component={StoreSettings}
         options={{ title: 'Store Settings' }}
+      />
+      <Stack.Screen
+        name='StoreSettingsEdit'
+        component={StoreSettingsEdit}
+        options={{ title: 'Store Settings Edit' }}
       />
       <Stack.Screen
         name='FoodPost'

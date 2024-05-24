@@ -30,6 +30,9 @@ import Colors from '../constants/colors';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { Picker } from '@react-native-picker/picker';
+
+const storeTypes = ['Restaurant', 'Cafe', 'Supermarket'];
 
 const StoreLogin = () => {
   const [category, setCategory] = useState('');
@@ -66,7 +69,7 @@ const StoreLogin = () => {
       }
     })();
   }, []);
-
+ 
   const handleMapPress = (event) => {
     const { coordinate } = event.nativeEvent;
     if (coordinate) {
@@ -210,11 +213,20 @@ const StoreLogin = () => {
       <View style={styles.bottomContainer}>
         <Button title='Pick an image from camera roll' onPress={selectImage} />
         <TextInput placeholder='Name' value={name} onChangeText={setName} />
-        <TextInput
-          placeholder='Category'
-          value={category}
-          onChangeText={setCategory}
-        />
+        <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={category}
+              style={{ height: 50, width: '100%' }}
+              onValueChange={(itemValue, itemIndex) =>
+                setCategory(itemValue)
+              }
+            >
+              <Picker.Item label='Select Store Category' value='' />
+              {storeTypes.map((type, index) => (
+                <Picker.Item key={index} label={type} value={type} />
+              ))}
+            </Picker>
+          </View>
         <TextInput
           placeholder='Description'
           value={description}
