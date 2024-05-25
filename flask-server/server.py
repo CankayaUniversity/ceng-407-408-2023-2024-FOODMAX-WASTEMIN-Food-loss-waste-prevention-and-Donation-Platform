@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import StandardScaler
@@ -6,6 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from scipy import sparse
 
 app = Flask(__name__)
+CORS(app)
 
 # Load the data
 df = pd.read_csv(r'../sentetik_veri.csv')
@@ -26,16 +28,26 @@ merged_features = sparse.hstack((tfidf_matrix, scaled_numeric))
 
 @app.route("/recommendations")
 def recommendations():
-    user_features = {
-        'PostAllergyWarning': request.args.get('PostAllergyWarning', ''),
-        'PostFoodProvider': request.args.get('PostFoodProvider', ''),
-        'PostDescription': request.args.get('PostDescription', ''),
-        'PostPrice': float(request.args.get('PostPrice', 0)),
-        'PostQuantity': int(request.args.get('PostQuantity', 0))
-    }
+    try:
+        post_price = request.args.get('PostPrice', 0)
+        post_quantity = request.args.get('PostQuantity', 0)
+        
+        # If post_price or post_quantity is an empty string, set them to 0
+        post_price = float(post_price) if post_price else 0
+        post_quantity = int(post_quantity) if post_quantity else 0
 
-    recommended_products = get_recommendations(user_features)
-    return jsonify({"recommendations": recommended_products})
+        user_features = {
+            'PostAllergyWarning': request.args.get('PostAllergyWarning', ''),
+            'PostFoodProvider': request.args.get('PostFoodProvider', ''),
+            'PostDescription': request.args.get('PostDescription', ''),
+            'PostPrice': post_price,
+            'PostQuantity': post_quantity
+        }
+
+        recommended_products = get_recommendations(user_features)
+        return jsonify({"recommendations": recommended_products})
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
 
 def get_recommendations(features, k=5):
     # Process the input features
@@ -77,4 +89,4 @@ def get_recommendations(features, k=5):
     return recommendations
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

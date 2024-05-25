@@ -102,6 +102,10 @@ function Home({ navigation }) {
           onPress={() => navigation.navigate('Recommendation')}
           title='Recommend It For You'
         />
+        <Button
+          onPress={() => navigation.navigate('Recommendation2')}
+          title='Recommend It For You 2'
+        />
       </View>
     </ScrollView>
   );
