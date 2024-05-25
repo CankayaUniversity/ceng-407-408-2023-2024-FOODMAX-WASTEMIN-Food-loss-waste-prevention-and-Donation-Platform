@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { TextInput, Button, View, FlatList, Text, StyleSheet, Image } from 'react-native';
 import { collection, query, where, getDocs } from 'firebase/firestore'; 
 import AllergyFilter from './AllergyFilter'; 
-import { FIREBASE_FIRESTORE } from '../FirebaseConfig'; 
+import FoodTypeFilter from './FoodTypeFilter'; 
 
-const FoodSearch = ({ setSearchQuery, setSelectedAllergies }) => {
+const FoodSearch = ({ setSearchQuery, setSelectedAllergies, setSelectedFoodType }) => {
   const [searchInput, setSearchInput] = useState('');
   const [filterModalVisible, setFilterModalVisible] = useState(false); 
+  const [typeFilterModalVisible, setTypeFilterModalVisible] = useState(false); 
   const [localSelectedAllergies, setLocalSelectedAllergies] = useState([]);
+  const [localSelectedFoodType, setLocalSelectedFoodType] = useState('');
 
   useEffect(() => {
     setSearchQuery(searchInput);
@@ -17,10 +19,20 @@ const FoodSearch = ({ setSearchQuery, setSelectedAllergies }) => {
     setFilterModalVisible(!filterModalVisible); 
   };
 
+  const toggleTypeFilterModal = () => {
+    setTypeFilterModalVisible(!typeFilterModalVisible); 
+  };
+
   const handleApplyFilter = (allergies) => {
     setLocalSelectedAllergies(allergies);
     setSelectedAllergies(allergies);
     toggleFilterModal(); // Close the modal after applying the filter
+  };
+
+  const handleApplyTypeFilter = (foodType) => {
+    setLocalSelectedFoodType(foodType);
+    setSelectedFoodType(foodType);
+    toggleTypeFilterModal(); // Close the modal after applying the filter
   };
 
   const handleAllergyWarningPress = (allergy) => {
@@ -31,6 +43,10 @@ const FoodSearch = ({ setSearchQuery, setSelectedAllergies }) => {
     }
   };
 
+  const handleFoodTypePress = (foodType) => {
+    setLocalSelectedFoodType(foodType);
+  };
+
   return (
     <View>
       <TextInput
@@ -39,7 +55,8 @@ const FoodSearch = ({ setSearchQuery, setSelectedAllergies }) => {
         onChangeText={(text) => setSearchInput(text)}
       />
       <Button title="Search" onPress={() => setSearchQuery(searchInput)} />
-      <Button title="Filter" onPress={toggleFilterModal} />
+      <Button title="Filter Allergies" onPress={toggleFilterModal} />
+      <Button title="Filter Food Type" onPress={toggleTypeFilterModal} />
       {filterModalVisible && (
         <AllergyFilter
           visible={filterModalVisible}
@@ -49,7 +66,15 @@ const FoodSearch = ({ setSearchQuery, setSelectedAllergies }) => {
           handleAllergyWarningPress={handleAllergyWarningPress}
         />
       )}
-      
+      {typeFilterModalVisible && (
+        <FoodTypeFilter
+          visible={typeFilterModalVisible}
+          onClose={toggleTypeFilterModal}
+          onApplyFilter={handleApplyTypeFilter}
+          selectedFoodType={localSelectedFoodType}
+          handleFoodTypePress={handleFoodTypePress}
+        />
+      )}
     </View>
   );
 };

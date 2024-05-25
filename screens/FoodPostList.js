@@ -5,13 +5,12 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FIREBASE_FIRESTORE } from '../FirebaseConfig';
 import FoodItem from '../components/FoodItem';
 import FoodSearch from '../components/FoodSearch';
-import AllergyFilter from '../components/AllergyFilter';
 
 function FoodPostList() {
   const [foodItems, setFoodItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAllergies, setSelectedAllergies] = useState([]);
-  const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [selectedFoodType, setSelectedFoodType] = useState('');
 
   const fetchData = async () => {
     try {
@@ -50,6 +49,15 @@ function FoodPostList() {
 
   console.log('Filtered Data:', fetchedData); 
 
+  //Food Type Filter
+  if (selectedFoodType) {
+    fetchedData = fetchedData.filter(item => {
+      console.log('Item PostFoodType:', item.PostFoodType);
+      return item.PostFoodType && item.PostFoodType === selectedFoodType;
+    });
+  }
+
+  console.log('Filtered Data:', fetchedData);
     setFoodItems(fetchedData);
   }catch (error) {
     console.error('Error fetching data:', error);
@@ -58,15 +66,15 @@ function FoodPostList() {
 
   useEffect(() => {
     fetchData();
-  }, [searchQuery, selectedAllergies]);
+  }, [searchQuery, selectedAllergies, selectedFoodType]);
 
   useFocusEffect(
     useCallback(() => {
       fetchData();
-    }, [searchQuery, selectedAllergies])
+    }, [searchQuery, selectedAllergies, selectedFoodType])
   );
 
-  const handleAllergyWarningPress = (allergy) => {
+  /*const handleAllergyWarningPress = (allergy) => {
     setSelectedAllergies(prevAllergies =>
       prevAllergies.includes(allergy)
         ? prevAllergies.filter(item => item !== allergy)
@@ -77,13 +85,17 @@ function FoodPostList() {
   const handleApplyFilter = (allergies) => {
     setSelectedAllergies(allergies);
     setIsFilterVisible(false);
-  };
+  };*/
 
   const renderItem = ({ item }) => <FoodItem data={item} />;
 
   return (
     <View>
-      <FoodSearch setSearchQuery={setSearchQuery} setSelectedAllergies={setSelectedAllergies}/>
+      <FoodSearch 
+        setSearchQuery={setSearchQuery} 
+        setSelectedAllergies={setSelectedAllergies}
+        setSelectedFoodType={setSelectedFoodType}
+      />
       <FlatList
         data={foodItems}
         renderItem={renderItem}
