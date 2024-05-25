@@ -26,6 +26,7 @@ import ProfileSettings from './screens/ProfileSettings';
 import StoreLogin from './screens/StoreLogin';
 import StoreSettings from './screens/StoreSettings';
 import Recommendation from './screens/Recommendation';
+import Recommendation2 from './screens/Recommendation2';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -43,6 +44,7 @@ function AuthStack() {
         component={RegisterScreen}
         options={{ headerShown: false }}
       />
+
 
     </Stack.Navigator>
   );
@@ -70,6 +72,11 @@ function InsideStack() {
         name='Recommendation'
         component={Recommendation}
         options={{ title: 'Recommendation It For You' }}
+      />
+      <Stack.Screen
+        name='Recommendation2'
+        component={Recommendation2}
+        options={{ title: 'Recommendation It For You 2' }}
       />
     </Stack.Navigator>
   );
