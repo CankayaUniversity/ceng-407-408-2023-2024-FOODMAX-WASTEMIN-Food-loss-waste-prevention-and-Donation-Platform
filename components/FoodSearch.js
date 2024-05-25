@@ -4,7 +4,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import AllergyFilter from './AllergyFilter'; 
 import FoodTypeFilter from './FoodTypeFilter'; 
 
-const FoodSearch = ({ setSearchQuery, setSelectedAllergies, setSelectedFoodType }) => {
+const FoodSearch = ({ setSearchQuery, setSelectedAllergies, setSelectedFoodType, resetFilters, searchQuery, selectedAllergies, selectedFoodType }) => {
   const [searchInput, setSearchInput] = useState('');
   const [filterModalVisible, setFilterModalVisible] = useState(false); 
   const [typeFilterModalVisible, setTypeFilterModalVisible] = useState(false); 
@@ -74,6 +74,9 @@ const FoodSearch = ({ setSearchQuery, setSelectedAllergies, setSelectedFoodType 
           selectedFoodType={localSelectedFoodType}
           handleFoodTypePress={handleFoodTypePress}
         />
+      )}
+      {(searchQuery || selectedAllergies.length > 0 || selectedFoodType) && (
+        <Button title="Clear Filters" onPress={resetFilters} />
       )}
     </View>
   );

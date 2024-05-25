@@ -64,6 +64,13 @@ function FoodPostList() {
   }
 };
 
+const resetFilters = () => {
+  setSearchQuery('');
+  setSelectedAllergies([]);
+  setSelectedFoodType('');
+  fetchData();
+};
+
   useEffect(() => {
     fetchData();
   }, [searchQuery, selectedAllergies, selectedFoodType]);
@@ -95,6 +102,10 @@ function FoodPostList() {
         setSearchQuery={setSearchQuery} 
         setSelectedAllergies={setSelectedAllergies}
         setSelectedFoodType={setSelectedFoodType}
+        resetFilters={resetFilters}
+        searchQuery={searchQuery}
+        selectedAllergies={selectedAllergies}
+        selectedFoodType={selectedFoodType}
       />
       <FlatList
         data={foodItems}
