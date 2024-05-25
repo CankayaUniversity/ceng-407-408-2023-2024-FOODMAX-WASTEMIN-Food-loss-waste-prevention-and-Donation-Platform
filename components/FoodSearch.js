@@ -4,54 +4,30 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import AllergyFilter from './AllergyFilter'; 
 import { FIREBASE_FIRESTORE } from '../FirebaseConfig'; 
 
-const FoodSearch = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+const FoodSearch = ({ setSearchQuery, setSelectedAllergies }) => {
+  const [searchInput, setSearchInput] = useState('');
   const [filterModalVisible, setFilterModalVisible] = useState(false); 
-  const [selectedAllergies, setSelectedAllergies] = useState([]);
+  const [localSelectedAllergies, setLocalSelectedAllergies] = useState([]);
 
   useEffect(() => {
-    searchFoodPosts();
-  }, []); 
-
-  const searchFoodPosts = async () => {
-    try {
-      let foodQuery = query(
-        collection(FIREBASE_FIRESTORE, 'FoodPost'),
-        where('PostTitle', '>=', searchQuery),
-        where('PostTitle', '<=', searchQuery + '\uf8ff')
-      );
-  
-      if (selectedAllergies.length > 0) {
-        foodQuery = query(foodQuery, where('PostAllergyWarning', 'array-contains-any', selectedAllergies));
-      }
-  
-      const querySnapshot = await getDocs(foodQuery);
-      const fetchedData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-  
-      setSearchResults(fetchedData);
-    } catch (error) {
-      console.error('Error searching food posts:', error);
-    }
-  };  
+    setSearchQuery(searchInput);
+  }, [searchInput, setSearchQuery]); 
 
   const toggleFilterModal = () => {
     setFilterModalVisible(!filterModalVisible); 
   };
-  
-  const handleApplyFilter = (selectedAllergies) => {
-    setSelectedAllergies(selectedAllergies);
+
+  const handleApplyFilter = (allergies) => {
+    setLocalSelectedAllergies(allergies);
+    setSelectedAllergies(allergies);
     toggleFilterModal(); // Close the modal after applying the filter
   };
 
   const handleAllergyWarningPress = (allergy) => {
-    if (selectedAllergies.includes(allergy)) {
-      setSelectedAllergies(selectedAllergies.filter((item) => item !== allergy));
+    if (localSelectedAllergies.includes(allergy)) {
+      setLocalSelectedAllergies(localSelectedAllergies.filter((item) => item !== allergy));
     } else {
-      setSelectedAllergies([...selectedAllergies, allergy]);
+      setLocalSelectedAllergies([...localSelectedAllergies, allergy]);
     }
   };
 
@@ -59,39 +35,21 @@ const FoodSearch = () => {
     <View>
       <TextInput
         placeholder="Search by title..."
-        value={searchQuery}
-        onChangeText={(text) => setSearchQuery(text)}
+        value={searchInput}
+        onChangeText={(text) => setSearchInput(text)}
       />
-      <Button title="Search" onPress={searchFoodPosts} />
+      <Button title="Search" onPress={() => setSearchQuery(searchInput)} />
       <Button title="Filter" onPress={toggleFilterModal} />
       {filterModalVisible && (
         <AllergyFilter
           visible={filterModalVisible}
           onClose={toggleFilterModal}
           onApplyFilter={handleApplyFilter}
-          selectedAllergies={selectedAllergies}
+          selectedAllergies={localSelectedAllergies}
           handleAllergyWarningPress={handleAllergyWarningPress}
         />
       )}
-      <FlatList
-        data={searchResults}
-        renderItem={({ item }) => (
-          <View style={styles.container}>
-            <Image source={{ uri: item.imageURL }} style={styles.image} />
-            <View style={styles.textContainer}>
-              <Text style={styles.title}>{item.PostTitle}</Text>
-              <Text style={styles.description}>{item.PostDescription}</Text>
-              <Text style={styles.price}>Price: ${item.PostPrice}</Text>
-              <Text style={styles.quantity}>Quantity: {item.PostQuantity}</Text>
-              <Button
-                onPress={() => navigation.navigate('FoodPostEdit', { postId: item.id })}
-                title="Edit Food Post"
-              />
-            </View>
-          </View>
-        )}
-        keyExtractor={(item) => item.id.toString()}
-      />
+      
     </View>
   );
 };

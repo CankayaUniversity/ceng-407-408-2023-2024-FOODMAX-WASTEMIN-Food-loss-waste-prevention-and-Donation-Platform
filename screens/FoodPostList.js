@@ -15,36 +15,46 @@ function FoodPostList() {
 
   const fetchData = async () => {
     try {
-      console.log("Fetching data...");
-      let foodQuery = collection(FIREBASE_FIRESTORE, 'FoodPost');
+      let foodQuery = query(collection(FIREBASE_FIRESTORE, 'FoodPost'));
 
       if (searchQuery) {
         foodQuery = query(foodQuery, where('PostTitle', '>=', searchQuery));
       }
 
       const querySnapshot = await getDocs(foodQuery);
-      const fetchedData = querySnapshot.docs.map((doc) => ({
+      let fetchedData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      
-      console.log("Number of fetched items:", fetchedData.length);
-      console.log("Fetched Data:", fetchedData);
 
-      let filteredItems = fetchedData;
+      console.log('Selected Allergies:', selectedAllergies);
+      console.log('Fetched Data:', fetchedData);
 
       // Apply allergy filter if selected allergies are present
       if (selectedAllergies.length > 0) {
-        filteredItems = fetchedData.filter(item =>
-          selectedAllergies.some(allergy => item.PostAllergyWarning.includes(allergy))
-        );
+        fetchedData = fetchedData.filter(item => {
+          console.log('Item PostAllergyWarning:', item.PostAllergyWarning); 
+
+          if (Array.isArray(item.PostAllergyWarning)) {
+            const matchesAllergies = selectedAllergies.some(allergy => {
+            const match = item.PostAllergyWarning.some(warning => warning.toLowerCase() === allergy.toLowerCase());
+            console.log(`Checking if ${item.PostAllergyWarning.map(w => w.toLowerCase())} includes ${allergy.toLowerCase()}: ${match}`); 
+            return match;
+          });
+          console.log('Matches Allergies:', matchesAllergies);
+          return matchesAllergies;
       }
-      console.log("Filtered Items:", filteredItems);
-      setFoodItems(filteredItems.length > 0 ? filteredItems : fetchedData);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
+      return false;
+    });
+  }
+
+  console.log('Filtered Data:', fetchedData); 
+
+    setFoodItems(fetchedData);
+  }catch (error) {
+    console.error('Error fetching data:', error);
+  }
+};
 
   useEffect(() => {
     fetchData();
@@ -64,21 +74,21 @@ function FoodPostList() {
     );
   };
 
+  const handleApplyFilter = (allergies) => {
+    setSelectedAllergies(allergies);
+    setIsFilterVisible(false);
+  };
+
   const renderItem = ({ item }) => <FoodItem data={item} />;
 
   return (
     <View>
-      <FoodSearch setSearchQuery={setSearchQuery} />
-      { <AllergyFilter
-        visible={isFilterVisible}
-        onClose={() => setIsFilterVisible(false)}
-        selectedAllergies={selectedAllergies}
-        handleAllergyWarningPress={handleAllergyWarningPress}
-      /> }
+      <FoodSearch setSearchQuery={setSearchQuery} setSelectedAllergies={setSelectedAllergies}/>
       <FlatList
         data={foodItems}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
+        ListEmptyComponent={<Text>No Food Items Found</Text>} // Add a message for empty list
       />
     </View>
   );
