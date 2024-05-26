@@ -29,6 +29,7 @@ import StoreSettingsEdit from './screens/StoreSettingsEdit';
 
 import Recommendation from './screens/Recommendation';
 import Recommendation2 from './screens/Recommendation2';
+import StoreDetails from './screens/StoreDetails';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -46,8 +47,6 @@ function AuthStack() {
         component={RegisterScreen}
         options={{ headerShown: false }}
       />
-
-
     </Stack.Navigator>
   );
 }
@@ -59,6 +58,11 @@ function InsideStack() {
         name='HomeScreen'
         component={HomeScreen}
         options={{ title: 'Home' }}
+      />
+      <Stack.Screen
+        name='StoreDetails'
+        component={StoreDetails}
+        options={{ title: 'Store Details' }}
       />
       <Stack.Screen
         name='FoodPostEdit'

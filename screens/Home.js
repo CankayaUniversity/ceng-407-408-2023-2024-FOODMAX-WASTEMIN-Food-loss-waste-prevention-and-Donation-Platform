@@ -8,10 +8,11 @@ import GlobalApi from '../src/services/GlobalApi';
 import PlaceList from '../components/PlaceList';
 import { UserLocationContext } from '../src/context/UserLocationContext';
 import { SIZES } from '../constants/sizes';
+import StoreList from '../components/StoreList';
 
 function Home({ navigation }) {
   const [placeList, setPlaceList] = useState([]);
-  const [foodPosts, setFoodPosts] = useState([]); // New state for food posts
+  const [foodPosts, setFoodPosts] = useState([]);
   const { location, setLocation } = useContext(UserLocationContext);
   const mapRegion = {
     latitude: location.coords.latitude,
@@ -91,8 +92,9 @@ function Home({ navigation }) {
       <CategoryList
         setSelectedCategory={(value) => GetNearBySearchPlace(value)}
       />
-      {placeList && <PlaceList placeList={placeList} />}
+      {/* {placeList && <PlaceList placeList={placeList} />} */}
       {/* put these temporarily here */}
+      <StoreList />
       <View style={styles.button}>
         <Button
           onPress={() => navigation.navigate('FoodPostList')}
