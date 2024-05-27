@@ -62,6 +62,7 @@ const FoodItem = ({ data }) => {
         <Text style={styles.description}>{data.PostDescription}</Text>
         <Text style={styles.price}>Price: ${data.PostPrice}</Text>
         <Text style={styles.quantity}>Quantity: {data.PostQuantity}</Text>
+        {data.PostFoodType && <Text style={styles.foodType}>Type: {data.PostFoodType}</Text>}
         {isCurrentUserMatched() ? (
           <Button
             onPress={() =>

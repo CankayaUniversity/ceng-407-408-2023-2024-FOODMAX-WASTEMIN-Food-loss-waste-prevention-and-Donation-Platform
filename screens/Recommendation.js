@@ -31,16 +31,6 @@ export default function Recommendation() {
 
   // get recommendations from flask server
   useEffect(() => {
-    const queryParams = {
-      params: {
-        PostAllergyWarning: 'Gluten-Free',
-        PostFoodProvider: 'LocalBakery',
-        PostDescription: 'Whole grain bread',
-        PostPrice: 5.0,
-        PostQuantity: 10,
-      },
-    };
-
     axios
       .get('http://localhost:5000/recommendations')
       .then((response) => {
