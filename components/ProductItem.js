@@ -21,6 +21,14 @@ const ProductItem = ({ product }) => {
   const currentUser = auth.currentUser;
 
   const isCurrentUserMatched = () => {
+    if (!currentUser) {
+      console.log('No current user found');
+      return false;
+    }
+    if (!product.PostFoodProvider) {
+      console.log('No PostFoodProvider found in product:', product);
+      return false;
+    }
     console.log('uid: ' + currentUser.uid);
     console.log('product post provider: ' + product.PostFoodProvider);
     return currentUser && product.PostFoodProvider === currentUser.uid;
@@ -55,7 +63,7 @@ const ProductItem = ({ product }) => {
         {isCurrentUserMatched() ? (
           <Button
             onPress={() =>
-              navigation.navigate('FoodPostEdit', { postId: data.id })
+              navigation.navigate('FoodPostEdit', { postId: product.id })
             }
             title='Edit Food Post'
           />

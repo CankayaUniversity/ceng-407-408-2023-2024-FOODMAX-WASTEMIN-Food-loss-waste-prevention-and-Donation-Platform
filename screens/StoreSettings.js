@@ -79,8 +79,7 @@ const StoreSettings = () => {
         const imageUrl = await getDownloadURL(ref(FIREBASE_STORAGE, data.PostPhotos[0]));
         return {
           id: doc.id,
-          PostTitle: data.PostTitle,
-          PostPrice: data.PostPrice,
+          ...data, // Spread all data properties including PostFoodProvider
           imageUrl,
         };
       }));
