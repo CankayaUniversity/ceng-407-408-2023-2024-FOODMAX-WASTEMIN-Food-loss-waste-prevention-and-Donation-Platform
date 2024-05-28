@@ -61,7 +61,7 @@ function FoodPostEdit({ route, navigation }) {
       const docRef = doc(FIREBASE_FIRESTORE, 'FoodPost', postId);
       await updateDoc(docRef, foodPost);
       console.log('Document successfully updated!');
-      navigation.navigate('FoodPostList');
+      navigation.navigate('MyStoreScreen');
     } catch (error) {
       console.error('Error updating document:', error);
     } finally {
@@ -263,7 +263,7 @@ function FoodPostEdit({ route, navigation }) {
               <Button title='Save' onPress={handleEdit} />
               <Button
                 title='Back'
-                onPress={() => navigation.navigate('FoodPostList')}
+                onPress={() => navigation.navigate('MyStoreScreen')}
               />
             </>
           )}

@@ -8,7 +8,8 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import React, { useCallback, useState } from 'react';
+import ProductItem from '../components/ProductItem';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import {
   collection,
@@ -20,9 +21,8 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 import { FIREBASE_FIRESTORE, FIREBASE_AUTH, FIREBASE_STORAGE } from '../FirebaseConfig';
-import { ref, deleteObject } from 'firebase/storage';
+import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
 import Colors from '../constants/colors';
-import ProductItem from '../components/ProductItem';
 
 const StoreSettings = () => {
   const navigation = useNavigation();
@@ -74,9 +74,15 @@ const StoreSettings = () => {
         getDoc(productRef)
       );
       const productDocuments = await Promise.all(productFetchPromises);
-      const productsData = productDocuments.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+      const productsData = await Promise.all(productDocuments.map(async (doc) => {
+        const data = doc.data();
+        const imageUrl = await getDownloadURL(ref(FIREBASE_STORAGE, data.PostPhotos[0]));
+        return {
+          id: doc.id,
+          PostTitle: data.PostTitle,
+          PostPrice: data.PostPrice,
+          imageUrl,
+        };
       }));
       setProducts(productsData);
     } catch (error) {
@@ -85,12 +91,12 @@ const StoreSettings = () => {
     }
   };
 
-  const deleteStore = async () => { // must also delete all foodposts of the store.
+  const deleteStore = async () => {
     try {
       const uid = user.uid;
       const storeDocRef = doc(firestore, 'Store', store.id);
 
-      // Delete store logo 
+      // Delete store logo
       if (store.logo) {
         const fileName = store.logo.substring(store.logo.lastIndexOf('%2F') + 3, store.logo.lastIndexOf('?'));
         const storageRef = ref(FIREBASE_STORAGE, 'logos/' + fileName);
@@ -102,15 +108,25 @@ const StoreSettings = () => {
           if (error.code === 'storage/object-not-found') {
             console.warn('Store logo not found in storage, skipping deletion');
           } else {
-            throw error; 
+            throw error;
           }
         }
       }
 
+      // Delete food posts associated with the store
+      const foodPostsQuerySnapshot = await getDocs(
+        query(
+          collection(firestore, 'FoodPosts'),
+          where('storeId', '==', store.id)
+        )
+      );
+
+      const deleteFoodPostPromises = foodPostsQuerySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deleteFoodPostPromises);
+
       await deleteDoc(storeDocRef);
       console.log('Store deleted successfully');
 
-      
       setStore(null);
       setProducts([]);
     } catch (error) {
@@ -130,66 +146,74 @@ const StoreSettings = () => {
     );
   };
 
+  const renderHeader = () => (
+    <View style={styles.container}>
+      <Image
+        style={styles.logo}
+        source={{
+          uri: store.logo,
+        }}
+      />
+      <View style={styles.containertext}>
+        <Text style={styles.destext}>
+          Store name: <Text style={styles.text}>{store.name}</Text>
+        </Text>
+        <Text style={styles.destext}>
+          Store description: <Text style={styles.text}>{store.description}</Text>
+        </Text>
+        <Text style={styles.destext}>
+          Store category: <Text style={styles.text}>{store.category}</Text>
+        </Text>
+        <Text style={styles.destext}>
+          Store address: <Text style={styles.text}>{store.address}</Text>
+        </Text>
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <Button
+          onPress={() => navigation.navigate('StoreSettingsEdit', { storeId: store.id })}
+          title="Update Store Settings"
+        />
+      </View>
+
+      
+      <View style={styles.buttonContainer}>
+        <Button
+          onPress={() => navigation.navigate('FoodPost', { storeId: store.id })}
+          title="Create a new food item"
+        />
+      </View>
+      
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Delete Store"
+          onPress={confirmDeleteStore}
+          color="red"
+        />
+      </View>
+      <Text style={styles.titleText}>Available products</Text>
+    </View>
+  );
+
   return (
-    <View>
+    <View style={{ flex: 1 }}>
+      
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : store ? (
-        <View style={styles.container}>
-          <Image
-            style={styles.logo}
-            source={{
-              uri: store.logo,
-            }}
-          />
-          <View style={styles.containertext}>
-            <Text style={styles.destext}>
-              Store name: <Text style={styles.text}>{store.name}</Text>
-            </Text>
-            <Text style={styles.destext}>
-              Store description: <Text style={styles.text}>{store.description}</Text>
-            </Text>
-            <Text style={styles.destext}>
-              Store category: <Text style={styles.text}>{store.category}</Text>
-            </Text>
-            <Text style={styles.destext}>
-              Store address: <Text style={styles.text}>{store.address}</Text>
-            </Text>
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <Button
-              onPress={() => navigation.navigate('StoreSettingsEdit', { storeId: store.id })}
-              title="Update Store Settings"
-            />
-          </View>
-
-          <Text style={styles.titleText}>Available products</Text>
-          {products && (
-            <FlatList
-              data={products}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => <ProductItem product={item} />}
-            />
-          )}
-          <View style={styles.buttonContainer}>
-            <Button
-              onPress={() => navigation.navigate('FoodPost', { storeId: store.id })}
-              title="Create a new food item"
-            />
-          </View>
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Delete Store"
-              onPress={confirmDeleteStore}
-              color="red"
-            />
-          </View>
-        </View>
+        <FlatList
+          data={products}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => <ProductItem product={item} />}
+          ListHeaderComponent={renderHeader}
+          contentContainerStyle={{ paddingHorizontal: 8, paddingBottom: 16 }}
+        />
       ) : (
         <Text>No store information available.</Text>
       )}
+      
     </View>
+    
   );
 };
 
@@ -204,7 +228,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: '80%',
-    marginBottom: 10,
+    marginBottom: 1,
   },
   containertext: {
     paddingVertical: 16,
@@ -216,6 +240,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textTransform: 'capitalize',
     color: Colors.navy,
+    marginBottom: 10,
   },
   destext: {
     fontWeight: 'bold',
@@ -228,5 +253,37 @@ const styles = StyleSheet.create({
   logo: {
     width: 100,
     height: 100,
+  },
+  productContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  productImage: {
+    width: 50,
+    height: 50,
+    marginRight: 10,
+    borderRadius: 8,
+  },
+  productDetails: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  productName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: Colors.black,
+  },
+  productPrice: {
+    fontSize: 14,
+    color: Colors.navy,
   },
 });

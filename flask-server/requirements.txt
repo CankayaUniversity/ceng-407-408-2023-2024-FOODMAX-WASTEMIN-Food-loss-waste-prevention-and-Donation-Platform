@@ -1,0 +1,5 @@
+Flask
+flask-cors
+pandas
+scikit-learn
+scipy
