@@ -2,6 +2,9 @@ import { View, Text, StyleSheet, Image, Button } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Colors from '../constants/colors';
 import { useNavigation } from '@react-navigation/native';
+import { FIREBASE_STORAGE, FIREBASE_AUTH } from '../FirebaseConfig';
+
+const auth = FIREBASE_AUTH;
 
 const ProductItem = ({ product }) => {
   const [imageURL, setImageURL] = useState(product.imageUrl);
@@ -15,6 +18,33 @@ const ProductItem = ({ product }) => {
     }
   }, [product]);
 
+  const currentUser = auth.currentUser;
+
+  const isCurrentUserMatched = () => {
+    console.log('uid: ' + currentUser.uid);
+    console.log('product post provider: ' + product.PostFoodProvider);
+    return currentUser && product.PostFoodProvider === currentUser.uid;
+  };
+
+  const handleBuy = async () => {
+    try {
+      // Create a new order document
+      const orderRef = doc(db, 'Orders');
+      await setDoc(orderRef, {
+        userId: currentUser.uid,
+        postId: data.id,
+        // Add any other relevant data to the order
+      });
+
+      // You can also update the inventory or do other actions here
+
+      Alert.alert('Success', 'Order placed successfully.');
+    } catch (error) {
+      console.error('Error placing order:', error);
+      Alert.alert('Error', 'Failed to place order. Please try again later.');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Image source={{ uri: imageURL }} style={styles.image} />
@@ -22,12 +52,21 @@ const ProductItem = ({ product }) => {
         <Text style={styles.titleText}>{product.PostTitle}</Text>
         <Text style={styles.priceText}>${product.PostPrice}</Text>
         <Text style={styles.descriptionText}>{product.PostDescription}</Text>
-        <Button
-          onPress={() =>
-            navigation.navigate('FoodPostEdit', { postId: product.id })
-          }
-          title='Edit Food Post'
-        />
+        {isCurrentUserMatched() ? (
+          <Button
+            onPress={() =>
+              navigation.navigate('FoodPostEdit', { postId: data.id })
+            }
+            title='Edit Food Post'
+          />
+        ) : (
+          <Button
+            onPress={() => {
+              handleBuy;
+            }}
+            title='Buy'
+          />
+        )}
       </View>
     </View>
   );

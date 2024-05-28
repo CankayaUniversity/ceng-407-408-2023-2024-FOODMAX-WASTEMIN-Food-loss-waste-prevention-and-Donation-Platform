@@ -1,7 +1,8 @@
-import { View, Text, ActivityIndicator, FlatList } from 'react-native';
+import { View, Text, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { FIREBASE_FIRESTORE } from '../FirebaseConfig';
+import { FIREBASE_FIRESTORE, FIREBASE_STORAGE } from '../FirebaseConfig';
 import { getDoc, doc } from 'firebase/firestore';
+import { ref, getDownloadURL } from 'firebase/storage';
 import ProductItem from '../components/ProductItem';
 
 export default function StoreDetails({ route }) {
@@ -18,7 +19,6 @@ export default function StoreDetails({ route }) {
         if (docSnap.exists()) {
           setStore(docSnap.data());
           fetchProducts(docSnap.data().products);
-          setLoading(false);
         } else {
           console.log('No such document!');
           setLoading(false);
@@ -38,21 +38,29 @@ export default function StoreDetails({ route }) {
         getDoc(productRef)
       );
       const productDocuments = await Promise.all(productFetchPromises);
-      const productsData = productDocuments.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+      const productsData = await Promise.all(productDocuments.map(async (doc) => {
+        const data = doc.data();
+        const imageUrl = await getDownloadURL(ref(FIREBASE_STORAGE, data.PostPhotos[0]));
+        return {
+          id: doc.id,
+          ...data,
+          imageUrl,
+        };
       }));
+      console.log('Fetched products data:', productsData); // Log product data
       setProducts(productsData);
     } catch (error) {
       console.error('Error fetching products:', error);
       setProducts([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size='large' />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" />
       </View>
     );
   }
@@ -66,18 +74,36 @@ export default function StoreDetails({ route }) {
   }
 
   return (
-    <View>
-      <Text>Store Name: {store.name}</Text>
-      <Text>Store Address: {store.address}</Text>
+    <View style={styles.container}>
+      <Text style={styles.storeName}>Store Name: {store.name}</Text>
+      <Text style={styles.storeAddress}>Store Address: {store.address}</Text>
       {products && (
-        <View>
-          <FlatList
-            data={products}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => <ProductItem product={item} />}
-          />
-        </View>
+        <FlatList
+          data={products}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => <ProductItem product={item} />}
+        />
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  storeName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  storeAddress: {
+    fontSize: 16,
+    marginVertical: 8,
+  },
+});
