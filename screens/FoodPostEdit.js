@@ -7,6 +7,7 @@ import {
   Text,
   ActivityIndicator,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -135,6 +136,40 @@ function FoodPostEdit({ route, navigation }) {
     }
   };
 
+  const handleSetAvailability = () => {
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete this post?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              const docRef = doc(FIREBASE_FIRESTORE, 'FoodPost', postId);
+              await updateDoc(docRef, { PostAvailability: 1 });
+              setFoodPost((prevState) => ({
+                ...prevState,
+                PostAvailability: 1,
+              }));
+              Alert.alert('Success', 'Post deleted.');
+              navigation.navigate('StoreSettings');
+            } catch (error) {
+              console.error('Error deleting post:', error);
+              Alert.alert('Error', 'Failed to delete post. Please try again later.');
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.scrollView}>
       <View style={styles.screen}>
@@ -176,7 +211,7 @@ function FoodPostEdit({ route, navigation }) {
               style={{ height: 50, width: '100%' }}
               onValueChange={
                 (itemValue, itemIndex) =>
-                  handleChange('PostFoodType', itemValue) // Call handleChange function
+                  handleChange('PostFoodType', itemValue) 
               }
             >
               <Picker.Item label='Select Food Type' value='' />
@@ -265,6 +300,11 @@ function FoodPostEdit({ route, navigation }) {
                 title='Back'
                 onPress={() => navigation.navigate('MyStoreScreen')}
               />
+              <Button
+                title='Delete Food Post'  // doesnt actually delete since we want to keep foodposts as previous purchases under users
+                onPress={handleSetAvailability} // only sets availability to 1 (so posts wont show up)
+                color="red"
+              />
             </>
           )}
 
@@ -296,7 +336,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   allergyButton: {
-    //doesnt show up!
     paddingHorizontal: 10,
     paddingVertical: 10,
     borderRadius: 30,
