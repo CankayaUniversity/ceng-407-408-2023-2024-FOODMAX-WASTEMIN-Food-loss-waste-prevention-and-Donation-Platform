@@ -157,7 +157,7 @@ function FoodPostEdit({ route, navigation }) {
                 PostAvailability: 1,
               }));
               Alert.alert('Success', 'Post deleted.');
-              navigation.navigate('StoreSettings');
+              navigation.navigate('MyStoreScreen');
             } catch (error) {
               console.error('Error deleting post:', error);
               Alert.alert('Error', 'Failed to delete post. Please try again later.');
