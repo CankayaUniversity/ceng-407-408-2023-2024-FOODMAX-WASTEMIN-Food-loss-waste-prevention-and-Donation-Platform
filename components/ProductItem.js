@@ -1,8 +1,10 @@
-import { View, Text, StyleSheet, Image, Button } from 'react-native';
+import { View, Text, StyleSheet, Image, Button, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Colors from '../constants/colors';
 import { useNavigation } from '@react-navigation/native';
 import { FIREBASE_STORAGE, FIREBASE_AUTH } from '../FirebaseConfig';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../FirebaseConfig';
 
 const auth = FIREBASE_AUTH;
 
@@ -30,21 +32,20 @@ const ProductItem = ({ product }) => {
       return false;
     }
     console.log('uid: ' + currentUser.uid);
+    console.log('quantity: ' + product.PostQuantity);
+    console.log('availability: ' + product.PostAvailability);
     console.log('product post provider: ' + product.PostFoodProvider);
     return currentUser && product.PostFoodProvider === currentUser.uid;
   };
 
   const handleBuy = async () => {
     try {
-      // Create a new order document
       const orderRef = doc(db, 'Orders');
       await setDoc(orderRef, {
         userId: currentUser.uid,
-        postId: data.id,
+        postId: product.id,
         // Add any other relevant data to the order
       });
-
-      // You can also update the inventory or do other actions here
 
       Alert.alert('Success', 'Order placed successfully.');
     } catch (error) {
@@ -52,6 +53,10 @@ const ProductItem = ({ product }) => {
       Alert.alert('Error', 'Failed to place order. Please try again later.');
     }
   };
+
+  if (product.PostQuantity === 0 || product.PostAvailability === 1) {
+    return null;
+  }
 
   return (
     <View style={styles.container}>
@@ -69,9 +74,7 @@ const ProductItem = ({ product }) => {
           />
         ) : (
           <Button
-            onPress={() => {
-              handleBuy;
-            }}
+            onPress={handleBuy}
             title='Buy'
           />
         )}
