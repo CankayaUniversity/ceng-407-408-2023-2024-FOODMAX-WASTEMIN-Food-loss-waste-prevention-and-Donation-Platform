@@ -46,6 +46,9 @@ export default function Recommendation2() {
               <Text>Price: {item.PostPrice}</Text>
               <Text>Quantity: {item.PostQuantity}</Text>
               <Text>Post ID: {item.PostId}</Text>
+                <View style={styles.butt}>
+                <Button title='Buy' onPress={() => console.log('Buy button pressed')} />
+                </View>
             </View>
           ))}
         </View>
@@ -82,4 +85,11 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
   },
+  butt:{
+    marginTop: 20,
+    marginBottom: 40,
+    marginLeft: 90,
+    marginRight: 10,
+    width: '40%',
+  }
 });
