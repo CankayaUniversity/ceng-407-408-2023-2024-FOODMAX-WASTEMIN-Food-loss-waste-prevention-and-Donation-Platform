@@ -9,6 +9,7 @@ import HomeScreen from './screens/Home';
 import FoodPostListScreen from './screens/FoodPostList';
 import RegisterScreen from './screens/RegisterScreen';
 import SettingsScreen from './screens/Settings';
+import Buy from './screens/Buy';
 import DiscoverScreen from './screens/DiscoverScreen';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -63,6 +64,11 @@ function InsideStack() {
         name='StoreDetails'
         component={StoreDetails}
         options={{ title: 'Store Details' }}
+      />
+      <Stack.Screen
+        name='Buy'
+        component={Buy}
+        options={{ title: 'Buy' }}
       />
       <Stack.Screen
         name='FoodPostEdit'

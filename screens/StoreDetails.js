@@ -4,12 +4,14 @@ import { FIREBASE_FIRESTORE, FIREBASE_STORAGE } from '../FirebaseConfig';
 import { getDoc, doc } from 'firebase/firestore';
 import { ref, getDownloadURL } from 'firebase/storage';
 import ProductItem from '../components/ProductItem';
+import { useNavigation } from '@react-navigation/native';
 
 export default function StoreDetails({ route }) {
   const { storeId } = route.params;
   const [store, setStore] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchStore = async () => {
@@ -17,8 +19,10 @@ export default function StoreDetails({ route }) {
       try {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setStore(docSnap.data());
-          fetchProducts(docSnap.data().products);
+          const storeData = docSnap.data();
+          setStore(storeData);
+          console.log('Store data:', storeData);  // Log store data
+          fetchProducts(storeData.products);
         } else {
           console.log('No such document!');
           setLoading(false);
@@ -47,7 +51,7 @@ export default function StoreDetails({ route }) {
           imageUrl,
         };
       }));
-      console.log('Fetched products data:', productsData); // Log product data
+      console.log('Fetched products data:', productsData);  // Log product data
       setProducts(productsData);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -57,6 +61,23 @@ export default function StoreDetails({ route }) {
     }
   };
 
+  const handleProductPress = (productId) => {
+    if (store) {
+      console.log('Navigating with:', {
+        postId: productId,
+        storeName: store.name,
+        storeAddress: store.address,
+      });
+      navigation.navigate('Buy', {
+        postId: productId,
+        storeName: store.name,
+        storeAddress: store.address,
+      });
+    } else {
+      console.log('Store data not available for navigation');
+    }
+  };
+  
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -81,7 +102,9 @@ export default function StoreDetails({ route }) {
         <FlatList
           data={products}
           keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => <ProductItem product={item} />}
+          renderItem={({ item }) => (
+            <ProductItem product={item} onPress={() => handleProductPress(item.id)} />
+          )}
         />
       )}
     </View>

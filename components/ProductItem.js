@@ -2,11 +2,8 @@ import { View, Text, StyleSheet, Image, Button, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Colors from '../constants/colors';
 import { useNavigation } from '@react-navigation/native';
-import { FIREBASE_STORAGE, FIREBASE_AUTH } from '../FirebaseConfig';
-import { doc, setDoc } from 'firebase/firestore';
-import { db } from '../FirebaseConfig';
-
-const auth = FIREBASE_AUTH;
+import { collection, addDoc } from 'firebase/firestore';
+import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../FirebaseConfig';
 
 const ProductItem = ({ product }) => {
   const [imageURL, setImageURL] = useState(product.imageUrl);
@@ -20,7 +17,7 @@ const ProductItem = ({ product }) => {
     }
   }, [product]);
 
-  const currentUser = auth.currentUser;
+  const currentUser = FIREBASE_AUTH.currentUser;
 
   const isCurrentUserMatched = () => {
     if (!currentUser) {
@@ -40,21 +37,21 @@ const ProductItem = ({ product }) => {
 
   const handleBuy = async () => {
     try {
-      const orderRef = doc(db, 'Orders');
-      await setDoc(orderRef, {
+      const ordersCollectionRef = collection(FIREBASE_FIRESTORE, 'Orders');
+      await addDoc(ordersCollectionRef, {
         userId: currentUser.uid,
         postId: product.id,
         // Add any other relevant data to the order
       });
 
-      Alert.alert('Success', 'Order placed successfully.');
+      navigation.navigate('Buy', { postId: product.id });
     } catch (error) {
       console.error('Error placing order:', error);
       Alert.alert('Error', 'Failed to place order. Please try again later.');
     }
   };
 
-  if (product.PostQuantity === 0 || product.PostAvailability === 1) {
+  if (product.PostQuantity <= 0 || product.PostAvailability === 1) {
     return null;
   }
 
