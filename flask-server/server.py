@@ -1,6 +1,12 @@
+import os
+import firebase_admin
+from firebase_admin import credentials, firestore
+from dotenv import load_dotenv
+import base64
+import json
+import pandas as pd
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
@@ -9,17 +15,53 @@ from scipy import sparse
 app = Flask(__name__)
 CORS(app)
 
-# Load the data
-df = pd.read_csv(r'../sentetik_veri.csv')
+# .env dosyasının yolunu belirtin
+dotenv_path = os.path.join(os.path.dirname(__file__), 'firebase.env')
+load_dotenv(dotenv_path)
+
+# Firebase API ayarları
+firebase_service_account_base64 = os.getenv('FIREBASE_SERVICE_ACCOUNT_BASE64')
+
+# Çevresel değişkenlerin doğru şekilde yüklendiğini kontrol edin
+print(f"FIREBASE_SERVICE_ACCOUNT_BASE64: {firebase_service_account_base64}")
+
+if firebase_service_account_base64 is None:
+    raise ValueError("Environment variable FIREBASE_SERVICE_ACCOUNT_BASE64 is not set.")
+
+# Base64 kodunu çözerek JSON içeriğini yükleyin
+service_account_info = json.loads(base64.b64decode(firebase_service_account_base64))
+
+# Firebase Admin SDK'yı başlatın
+cred = credentials.Certificate(service_account_info)
+firebase_admin.initialize_app(cred)
+db = firestore.client()
+
+def fetch_data_from_firestore():
+    docs = db.collection('FoodPost').stream()
+    data = []
+    for doc in docs:
+        doc_data = doc.to_dict()
+        doc_data['DocumentID'] = doc.id
+        if 'PostExpiry' not in doc_data:
+            doc_data['PostExpiry'] = None
+        data.append(doc_data)
+    return data
+
+# Firebase'den veriyi çekmek
+data = fetch_data_from_firestore()
+if not data:
+    print("No data available to process. Exiting.")
+    exit()
+
+df = pd.DataFrame(data)
 
 # Set up the TF-IDF vectorizer and the StandardScaler
 text_features = ['PostAllergyWarning', 'PostFoodProvider', 'PostDescription']
 tfidf_vectorizer = TfidfVectorizer()
-tfidf_matrix = tfidf_vectorizer.fit_transform(df[text_features].apply(lambda x: ' '.join(x), axis=1))
+tfidf_matrix = tfidf_vectorizer.fit_transform(df[text_features].apply(lambda x: ' '.join(map(str, x)), axis=1))
 
 numeric_features = ['PostPrice', 'PostQuantity']
 scaler = StandardScaler()
-# Make sure to retain DataFrame structure with columns for scaling
 df_numeric = df[numeric_features]
 scaled_numeric = scaler.fit_transform(df_numeric)
 
@@ -59,7 +101,7 @@ def get_recommendations(features, k=5):
         features['PostPrice'],
         features['PostQuantity']
     ]], columns=numeric_features)
-    numeric_input = scaler.transform(numeric_data)  # Uses DataFrame to keep column names
+    numeric_input = scaler.transform(numeric_data)
     
     # Combine features and compute similarity scores
     input_features = sparse.hstack((tfidf_input, sparse.csr_matrix(numeric_input)))
@@ -72,20 +114,21 @@ def get_recommendations(features, k=5):
     # Create a list of dictionaries with detailed information
     recommendations = []
     for _, row in recommended_products.iterrows():
-        recommendations.append({
-            "DocumentID": row['Document ID'],
+        recommendation = {
+            "DocumentID": row['DocumentID'],
             "PostTitle": row['PostTitle'],
             "PostAllergyWarning": row['PostAllergyWarning'],
             "PostDate": row['PostDate'],
             "PostDescription": row['PostDescription'],
-            "PostExpiry": row['PostExpiry'],
+            "PostExpiry": row['PostExpiry'] if 'PostExpiry' in row else None,
             "PostFoodProvider": row['PostFoodProvider'],
             "PostFoodType": row['PostFoodType'],
             "PostPhotos": row['PostPhotos'],
             "PostPrice": row['PostPrice'],
             "PostQuantity": row['PostQuantity'],
             "PostId": row['PostId']
-        })
+        }
+        recommendations.append(recommendation)
     return recommendations
 
 if __name__ == '__main__':
