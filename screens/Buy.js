@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Image, Alert, ScrollView, Button } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
-import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, arrayUnion, increment } from 'firebase/firestore';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../FirebaseConfig';
 import Colors from '../constants/colors';
@@ -76,7 +76,8 @@ const Buy = () => {
             // Update the user's purchased products
             const userRef = doc(FIREBASE_FIRESTORE, 'users', currentUser.uid);
             await updateDoc(userRef, {
-              purchasedProducts: arrayUnion(postId)
+              purchasedProducts: arrayUnion(postId),
+              rewardPoint: increment(5),
             });
 
             // Manually decrement the product quantity

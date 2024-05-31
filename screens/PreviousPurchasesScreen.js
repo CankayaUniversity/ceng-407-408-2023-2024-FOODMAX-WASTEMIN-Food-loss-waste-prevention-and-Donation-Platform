@@ -7,6 +7,7 @@ import Colors from '../constants/colors';
 
 const PreviousPurchasesScreen = () => {
   const [purchasedItems, setPurchasedItems] = useState([]);
+  const [rewardPoints, setRewardPoints] = useState(0);
   const currentUser = FIREBASE_AUTH.currentUser;
 
   useEffect(() => {
@@ -15,7 +16,7 @@ const PreviousPurchasesScreen = () => {
       return;
     }
   
-    const fetchPurchasedItems = async () => {
+    const fetchUserData = async () => {
       try {
         const userDocRef = doc(FIREBASE_FIRESTORE, 'users', currentUser.uid);
         const userDoc = await getDoc(userDocRef);
@@ -23,16 +24,17 @@ const PreviousPurchasesScreen = () => {
         if (userDoc.exists()) {
           const data = userDoc.data();
           setPurchasedItems(data.purchasedProducts || []);
+          setRewardPoints(data.rewardPoint || 0);
         } else {
           Alert.alert('Error', 'No user data found.');
         }
       } catch (error) {
-        console.error('Error fetching purchased items:', error);
-        Alert.alert('Error', 'Failed to fetch purchased items. Please try again later.');
+        console.error('Error fetching user data:', error);
+        Alert.alert('Error', 'Failed to fetch user data. Please try again later.');
       }
     };
   
-    fetchPurchasedItems();
+    fetchUserData();
   }, [currentUser]);
   
 
@@ -46,11 +48,14 @@ const PreviousPurchasesScreen = () => {
     return <ProductItem2 product={item} />;
   };
   
-  
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Previous Purchases</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Previous Purchases</Text>
+        <View style={styles.rewardContainer}>
+          <Text style={styles.rewardText}>⭐ {rewardPoints}</Text>
+        </View>
+      </View>
       <FlatList
         data={purchasedItems}
         renderItem={renderProductItem}
@@ -69,11 +74,24 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: Colors.white,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 16,
     color: Colors.navy,
+  },
+  rewardContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rewardText: {
+    fontSize: 18,
+    color: Colors.gold,
   },
   emptyText: {
     fontSize: 16,

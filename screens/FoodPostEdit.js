@@ -194,15 +194,15 @@ function FoodPostEdit({ route, navigation }) {
 
           <TextInput
             style={styles.input}
-            value={foodPost?.PostQuantity || ''}
+            value={foodPost?.PostQuantity?.toString() || ''}
             placeholder='Quantity'
-            onChangeText={(text) => handleChange('PostQuantity', text)}
+            onChangeText={(text) => handleChange('PostQuantity', Number(text))}
           />
           <TextInput
             style={styles.input}
-            value={foodPost?.PostPrice || ''}
+            value={foodPost?.PostPrice?.toString() || ''}
             placeholder='Price'
-            onChangeText={(text) => handleChange('PostPrice', text)}
+            onChangeText={(text) => handleChange('PostPrice', Number(text))}
           />
           <Text>Food Type</Text>
           <View style={styles.pickerContainer}>
