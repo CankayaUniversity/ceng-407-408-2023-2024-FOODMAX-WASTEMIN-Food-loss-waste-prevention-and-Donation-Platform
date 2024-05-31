@@ -8,14 +8,12 @@ export default function Recommendation2() {
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('');
   const [recommendations, setRecommendations] = useState(null);
-
   // USE your IP address 
   // Port number: 5000
   const handleRecommend = async () => {
     try {
       const response = await fetch(`http://192.168.1.4:5000/recommendations?PostAllergyWarning=${allergyWarning}&PostFoodProvider=${foodProvider}&PostDescription=${description}&PostPrice=${price}&PostQuantity=${quantity}`);
       const responseText = await response.text(); 
-      console.log(responseText); 
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -28,27 +26,23 @@ export default function Recommendation2() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Button title="RECOMMEND IT FOR YOU" onPress={handleRecommend} />
+      <Button title="RECOMMEND IT FOR YOU" onPress={handleRecommend} color="#1c8aff"/>
       {recommendations && (
         <View style={styles.resultContainer}>
           <Text style={styles.resultTitle}>Recommended Meals</Text>
           {recommendations.map((item, index) => {
-            
             const baseURL = 'https://firebasestorage.googleapis.com/v0/b/nourish-me-8e6b6.appspot.com/o/';
             return (
               <View key={index} style={styles.featureContainer}>
-                <Text>Document ID: {item.DocumentID}</Text>
-                <Text>Title: {item.PostTitle}</Text>
-                <Text>Allergy Warning: {item.PostAllergyWarning}</Text>
-                <Text>Date: {item.PostDate}</Text>
-                <Text>Description: {item.PostDescription}</Text>
-                <Text>Expiry: {item.PostExpiry}</Text>
-                <Text>Food Provider: {item.PostFoodProvider}</Text>
-                <Text>Food Type: {item.PostFoodType}</Text>
+                <Text style={styles.featureTitle}>{item.PostTitle}</Text>
+                <Text style={styles.featureText}><Text style={styles.boldText}>Allergy Warning:</Text> {item.PostAllergyWarning}</Text>
+                <Text style={styles.featureText}><Text style={styles.boldText}>Date:</Text> {item.PostDate}</Text>
+                <Text style={styles.featureText}><Text style={styles.boldText}>Description:</Text> {item.PostDescription}</Text>
+                <Text style={styles.featureText}><Text style={styles.boldText}>Expiry:</Text> {item.PostExpiry}</Text>
+                <Text style={styles.featureText}><Text style={styles.boldText}>Food Type:</Text> {item.PostFoodType}</Text>
                 {item.PostPhotos && Array.isArray(item.PostPhotos) && item.PostPhotos.length > 0 ? (
                   <View style={styles.photosContainer}>
                     {item.PostPhotos.map((photo, index) => {
-                      // Create the full URL for the image
                       const imagePath = photo.replace(/\//g, '%2F'); 
                       const fullURL = `${baseURL}${imagePath}?alt=media`;
                       return (
@@ -62,13 +56,12 @@ export default function Recommendation2() {
                     })}
                   </View>
                 ) : (
-                  <Text>No photos available</Text>
+                  <Text style={styles.noPhotosText}>No photos available</Text>
                 )}
-                <Text>Price: {item.PostPrice} $ </Text>
-                <Text>Quantity: {item.PostQuantity}</Text>
-                <Text>Post ID: {item.PostId}</Text>
-                <View style={styles.butt}>
-                  <Button title='Buy' onPress={() => console.log('Buy button pressed')} />
+                <Text style={styles.featureText}><Text style={styles.boldText}>Price:</Text> {item.PostPrice} $</Text>
+                <Text style={styles.featureText}><Text style={styles.boldText}>Quantity:</Text> {item.PostQuantity}</Text>
+                <View style={styles.buyButtonContainer}>
+                  <Button title='Buy' onPress={() => console.log('Buy button pressed')} color="#1c8aff"/>
                 </View>
               </View>
             );
@@ -83,41 +76,67 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     alignItems: 'center',
+    backgroundColor: '#f5f5f5',
   },
-  input: {
+  buttonContainer: {
     width: '100%',
-    padding: 10,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
+    marginBottom: 20,
   },
   resultContainer: {
     marginTop: 20,
     width: '100%',
   },
   resultTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+    textAlign: 'center',
   },
   featureContainer: {
     marginTop: 10,
-    padding: 10,
+    padding: 15,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  featureTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#1c8aff',
+  },
+  featureText: {
+    fontSize: 16,
+    marginBottom: 5,
+    color: '#555',
+  },
+  boldText: {
+    fontWeight: 'bold',
+    color: '#333',
   },
   photosContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    marginTop: 10,
   },
   photo: {
     width: 100,
     height: 100,
     margin: 5,
-    borderRadius: 5,
+    borderRadius: 10,
   },
-  butt: {
+  noPhotosText: {
+    fontSize: 16,
+    color: '#999',
+  },
+  buyButtonContainer: {
     marginTop: 20,
     marginBottom: 40,
     marginLeft: 90,
