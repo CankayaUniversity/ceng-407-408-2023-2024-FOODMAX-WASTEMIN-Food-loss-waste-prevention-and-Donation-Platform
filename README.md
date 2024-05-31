@@ -22,17 +22,25 @@ https://foodmaxwastemin.wordpress.com/
 git clone https://github.com/CankayaUniversity/ceng-407-408-2023-2024-FOODMAX-WASTEMIN-Food-loss-waste-prevention-and-Donation-Platform.git
 ```
 
-2. Install all the dependencies
+2. Navigate into the project directory.
+
+```
+cd ceng-407-408-2023-2024-FOODMAX-WASTEMIN-Food-loss-waste-prevention-and-Donation-Platform
+```
+
+3. Install all the necessary dependencies using npm.
 
 ```
 npm install
 ```
 
-3. To run the app run this command and then when it is started press 'a' for run the android emulator
+4. To run the app run this command and then when it is started press 'a' for run the android emulator
 
 ```
 npm start
 ```
+
+5. Copy the .env.default file in your local environment and rename it to .env. Then, replace the API keys within this file with your own keys.
 
 ## Running the Flask Server
 
