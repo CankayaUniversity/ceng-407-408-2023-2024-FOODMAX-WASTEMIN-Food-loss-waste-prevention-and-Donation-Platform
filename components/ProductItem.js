@@ -37,13 +37,7 @@ const ProductItem = ({ product }) => {
 
   const handleBuy = async () => {
     try {
-      const ordersCollectionRef = collection(FIREBASE_FIRESTORE, 'Orders');
-      await addDoc(ordersCollectionRef, {
-        userId: currentUser.uid,
-        postId: product.id,
-        // Add any other relevant data to the order
-      });
-
+      
       navigation.navigate('Buy', { postId: product.id });
     } catch (error) {
       console.error('Error placing order:', error);

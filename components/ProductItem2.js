@@ -1,14 +1,18 @@
-import { View, Text, StyleSheet, Image, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, Alert, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Colors from '../constants/colors';
-import {  doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
-import { FIREBASE_FIRESTORE } from '../FirebaseConfig';
+import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../FirebaseConfig';
+import { useNavigation } from '@react-navigation/native';
 
 const ProductItem2 = ({ product }) => {
   const [imageURL, setImageURL] = useState('empty');
   const [productData, setProductData] = useState(null);
+  const [isRated, setIsRated] = useState(false);
   const storage = getStorage();
+  const navigation = useNavigation();
+  const currentUser = FIREBASE_AUTH.currentUser;
 
   useEffect(() => {
     const fetchProductData = async () => {
@@ -32,37 +36,58 @@ const ProductItem2 = ({ product }) => {
       }
     };
 
+    const checkIfRated = async () => {
+      try {
+        const userDocRef = doc(FIREBASE_FIRESTORE, 'users', currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setIsRated(userData.ratedProducts && userData.ratedProducts.includes(product));
+        }
+      } catch (error) {
+        console.error('Error checking if product is rated:', error);
+      }
+    };
+
     if (product) {
       fetchProductData();
+      checkIfRated();
     }
-  }, [product, storage]);
+  }, [product, storage, currentUser]);
 
+  const handleRatePress = () => {
+    if (isRated) {
+      Alert.alert('Error', 'You have already rated this product.');
+    } else {
+      navigation.navigate('RatingScreen', { productId: product });
+    }
+  };
 
-
-  if (!productData ) {
+  if (!productData) {
     return null;
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <Image source={{ uri: imageURL }} style={styles.image} />
-        <View style={styles.textContainer}>
-          <Text style={styles.titleText}>{productData.PostTitle}</Text>
-          <Text style={styles.priceText}>${productData.PostPrice}</Text>
-          <Text style={styles.descriptionText}>{productData.PostDescription}</Text>
-        </View>
+    <View style={styles.container}>
+      <Image source={{ uri: imageURL }} style={styles.image} />
+      <View style={styles.textContainer}>
+        <Text style={styles.titleText}>{productData.PostTitle}</Text>
+        <Text style={styles.priceText}>${productData.PostPrice}</Text>
+        <Text style={styles.descriptionText}>{productData.PostDescription}</Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleRatePress}
+        >
+          <Text style={styles.buttonText}>Rate</Text>
+        </TouchableOpacity>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
 export default ProductItem2;
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    padding: 8,
-  },
   container: {
     flexDirection: 'row',
     padding: 8,
@@ -93,5 +118,18 @@ const styles = StyleSheet.create({
   priceText: {
     fontWeight: 'bold',
     color: Colors.green,
+  },
+  button: {
+    marginTop: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: Colors.navy,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
