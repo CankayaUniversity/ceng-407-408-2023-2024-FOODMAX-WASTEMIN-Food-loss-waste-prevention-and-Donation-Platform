@@ -28,9 +28,7 @@ import StoreLogin from './screens/StoreLogin';
 import StoreSettings from './screens/StoreSettings';
 import StoreSettingsEdit from './screens/StoreSettingsEdit';
 import PreviousPurchasesScreen from './screens/PreviousPurchasesScreen';
-
 import Recommendation from './screens/Recommendation';
-import Recommendation2 from './screens/Recommendation2';
 import StoreDetails from './screens/StoreDetails';
 
 const Stack = createNativeStackNavigator();
@@ -85,11 +83,6 @@ function InsideStack() {
         name='Recommendation'
         component={Recommendation}
         options={{ title: 'Recommendation It For You' }}
-      />
-      <Stack.Screen
-        name='Recommendation2'
-        component={Recommendation2}
-        options={{ title: 'Recommendation It For You 2' }}
       />
     </Stack.Navigator>
   );

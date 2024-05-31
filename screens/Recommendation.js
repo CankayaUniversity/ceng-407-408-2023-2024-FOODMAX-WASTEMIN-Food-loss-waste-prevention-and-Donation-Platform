@@ -1,121 +1,127 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, Button } from 'react-native';
-import axios from 'axios';
+import React, { useState } from 'react';
+import { View, TextInput, Button, Text, ScrollView, StyleSheet, Image } from 'react-native';
 
-export default function Recommendation() {
-  const [recommendations, setRecommendations] = useState([]);
+export default function Recommendation2() {
+  const [allergyWarning, setAllergyWarning] = useState('');
+  const [foodProvider, setFoodProvider] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [recommendations, setRecommendations] = useState(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          'https://firestore.googleapis.com/v1beta1/projects/nourish-me-8e6b6/databases/(default)/documents/recommendations'
-        );
-        const data = await response.json();
-        console.log('Data:', data);
-        // Gelen veriyi state'e kaydet
-        setRecommendations(data.documents);
-      } catch (error) {
-        console.error('Error fetching data:', error);
+  // USE your IP address 
+  // Port number: 5000
+  const handleRecommend = async () => {
+    try {
+      const response = await fetch(`http://192.168.1.4:5000/recommendations?PostAllergyWarning=${allergyWarning}&PostFoodProvider=${foodProvider}&PostDescription=${description}&PostPrice=${price}&PostQuantity=${quantity}`);
+      const responseText = await response.text(); 
+      console.log(responseText); 
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
-    };
-
-    // Veri çekme işlemini başlat
-    fetchData();
-
-    // Cleanup işlemi buraya eklenebilir
-    return () => {
-      // Gerekirse, bileşen kaldırıldığında temizlik yapılabilir
-    };
-  }, []);
-
-  // get recommendations from flask server
-  useEffect(() => {
-    axios
-      .get('http://localhost:5000/recommendations')
-      .then((response) => {
-        const titles = response.data.recommendations.map(
-          (item) => item.PostTitle
-        );
-        console.log(titles);
-      })
-      .catch((error) => {
-        console.error('There was an error!', error);
-      });
-  }, []);
+      const data = JSON.parse(responseText); 
+      setRecommendations(data.recommendations);
+    } catch (error) {
+      console.error('Network request failed:', error);
+    }
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Recommendations</Text>
-      {recommendations.map((recommendation, index) => (
-        <View style={styles.recommendationContainer} key={index}>
-          <View style={styles.row}>
-            <Image
-              source={{
-                uri: 'https://firebasestorage.googleapis.com/v0/b/nourish-me-8e6b6.appspot.com/o/images%2F5ffa3b32-9dbe-43b9-a786-e6ef6b4248d5.png?alt=media&token=172100c5-4c2a-4b1d-8906-6ea642b1ffbe',
-              }}
-              style={styles.image}
-            />
-            <View style={styles.textContainer}>
-              <Text style={styles.test}>Title:</Text>
-              <Text>{recommendation.fields.title.stringValue}</Text>
-              <Text style={styles.test}>Price:</Text>
-              <Text>{recommendation.fields.price.doubleValue} $ </Text>
-              <Text style={styles.test}>Quantity:</Text>
-              <Text>{recommendation.fields.quantity.integerValue}</Text>
-              <Text style={styles.test}>Provider:</Text>
-              <Text>{recommendation.fields.provider.stringValue}</Text>
-              <Text style={styles.test}>Description:</Text>
-              <Text>{recommendation.fields.description.stringValue}</Text>
-            </View>
-          </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Button title="RECOMMEND IT FOR YOU" onPress={handleRecommend} />
+      {recommendations && (
+        <View style={styles.resultContainer}>
+          <Text style={styles.resultTitle}>Recommended Meals</Text>
+          {recommendations.map((item, index) => {
+            
+            const baseURL = 'https://firebasestorage.googleapis.com/v0/b/nourish-me-8e6b6.appspot.com/o/';
+            return (
+              <View key={index} style={styles.featureContainer}>
+                <Text>Document ID: {item.DocumentID}</Text>
+                <Text>Title: {item.PostTitle}</Text>
+                <Text>Allergy Warning: {item.PostAllergyWarning}</Text>
+                <Text>Date: {item.PostDate}</Text>
+                <Text>Description: {item.PostDescription}</Text>
+                <Text>Expiry: {item.PostExpiry}</Text>
+                <Text>Food Provider: {item.PostFoodProvider}</Text>
+                <Text>Food Type: {item.PostFoodType}</Text>
+                {item.PostPhotos && Array.isArray(item.PostPhotos) && item.PostPhotos.length > 0 ? (
+                  <View style={styles.photosContainer}>
+                    {item.PostPhotos.map((photo, index) => {
+                      // Create the full URL for the image
+                      const imagePath = photo.replace(/\//g, '%2F'); 
+                      const fullURL = `${baseURL}${imagePath}?alt=media`;
+                      return (
+                        <Image 
+                          key={index} 
+                          source={{ uri: fullURL }} 
+                          style={styles.photo}
+                          onError={(e) => console.error('Image loading error:', e.nativeEvent.error)}
+                        />
+                      );
+                    })}
+                  </View>
+                ) : (
+                  <Text>No photos available</Text>
+                )}
+                <Text>Price: {item.PostPrice} $ </Text>
+                <Text>Quantity: {item.PostQuantity}</Text>
+                <Text>Post ID: {item.PostId}</Text>
+                <View style={styles.butt}>
+                  <Button title='Buy' onPress={() => console.log('Buy button pressed')} />
+                </View>
+              </View>
+            );
+          })}
         </View>
-      ))}
-      <View style={styles.button}>
-        <Button title='Buy' onPress={() => console.log('Buy button pressed')} />
-      </View>
-    </View>
+      )}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    padding: 20,
     alignItems: 'center',
+  },
+  input: {
+    width: '100%',
     padding: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
     marginBottom: 10,
-  },
-  recommendationContainer: {
-    marginVertical: 5,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
-    padding: 10,
+  },
+  resultContainer: {
+    marginTop: 20,
     width: '100%',
   },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  image: {
-    width: 100,
-    height: 140,
-    marginRight: 10,
-    marginLeft: 10,
-  },
-  textContainer: {
-    flex: 1,
-  },
-  test: {
+  resultTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
   },
-  button: {
+  featureContainer: {
+    marginTop: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+  },
+  photosContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  photo: {
+    width: 100,
+    height: 100,
+    margin: 5,
+    borderRadius: 5,
+  },
+  butt: {
     marginTop: 20,
     marginBottom: 40,
+    marginLeft: 90,
+    marginRight: 10,
     width: '40%',
   },
 });

@@ -15,23 +15,23 @@ from scipy import sparse
 app = Flask(__name__)
 CORS(app)
 
-# .env dosyasının yolunu belirtin
+
 dotenv_path = os.path.join(os.path.dirname(__file__), 'firebase.env')
 load_dotenv(dotenv_path)
 
-# Firebase API ayarları
+
 firebase_service_account_base64 = os.getenv('FIREBASE_SERVICE_ACCOUNT_BASE64')
 
-# Çevresel değişkenlerin doğru şekilde yüklendiğini kontrol edin
+
 print(f"FIREBASE_SERVICE_ACCOUNT_BASE64: {firebase_service_account_base64}")
 
 if firebase_service_account_base64 is None:
     raise ValueError("Environment variable FIREBASE_SERVICE_ACCOUNT_BASE64 is not set.")
 
-# Base64 kodunu çözerek JSON içeriğini yükleyin
+
 service_account_info = json.loads(base64.b64decode(firebase_service_account_base64))
 
-# Firebase Admin SDK'yı başlatın
+
 cred = credentials.Certificate(service_account_info)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
@@ -47,7 +47,7 @@ def fetch_data_from_firestore():
         data.append(doc_data)
     return data
 
-# Firebase'den veriyi çekmek
+
 data = fetch_data_from_firestore()
 if not data:
     print("No data available to process. Exiting.")
@@ -55,7 +55,7 @@ if not data:
 
 df = pd.DataFrame(data)
 
-# Set up the TF-IDF vectorizer and the StandardScaler
+
 text_features = ['PostAllergyWarning', 'PostFoodProvider', 'PostDescription']
 tfidf_vectorizer = TfidfVectorizer()
 tfidf_matrix = tfidf_vectorizer.fit_transform(df[text_features].apply(lambda x: ' '.join(map(str, x)), axis=1))
@@ -65,7 +65,7 @@ scaler = StandardScaler()
 df_numeric = df[numeric_features]
 scaled_numeric = scaler.fit_transform(df_numeric)
 
-# Create the feature matrix
+
 merged_features = sparse.hstack((tfidf_matrix, scaled_numeric))
 
 @app.route("/recommendations")
@@ -103,15 +103,15 @@ def get_recommendations(features, k=5):
     ]], columns=numeric_features)
     numeric_input = scaler.transform(numeric_data)
     
-    # Combine features and compute similarity scores
+
     input_features = sparse.hstack((tfidf_input, sparse.csr_matrix(numeric_input)))
     similarity_scores = cosine_similarity(input_features, merged_features)
     
-    # Select the top k similar items
+  
     similar_indices = similarity_scores.argsort()[0][-k-1:-1][::-1]
     recommended_products = df.iloc[similar_indices]
     
-    # Create a list of dictionaries with detailed information
+    
     recommendations = []
     for _, row in recommended_products.iterrows():
         recommendation = {
