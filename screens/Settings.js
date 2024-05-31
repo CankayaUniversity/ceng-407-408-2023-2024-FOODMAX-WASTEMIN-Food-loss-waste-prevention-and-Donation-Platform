@@ -25,6 +25,12 @@ function Settings() {
           iconBefore='account-edit'
         />
         <CustomSettingsButton
+          onPress={() => navigation.navigate('PreviousPurchasesScreen')}
+          title='Previous Purchases'
+          style={styles.buttonWidthBorder}
+          iconBefore='history'
+        />
+        <CustomSettingsButton
           onPress={() => navigation.navigate('StoreScreen')}
           title='Store Login'
           iconBefore='store-plus'

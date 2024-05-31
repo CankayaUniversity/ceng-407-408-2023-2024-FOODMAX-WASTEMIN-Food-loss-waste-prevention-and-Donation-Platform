@@ -27,6 +27,7 @@ import ProfileSettings from './screens/ProfileSettings';
 import StoreLogin from './screens/StoreLogin';
 import StoreSettings from './screens/StoreSettings';
 import StoreSettingsEdit from './screens/StoreSettingsEdit';
+import PreviousPurchasesScreen from './screens/PreviousPurchasesScreen';
 
 import Recommendation from './screens/Recommendation';
 import Recommendation2 from './screens/Recommendation2';
@@ -116,6 +117,11 @@ function SettingsStack() {
         name='MyStoreScreen'
         component={StoreSettings}
         options={{ title: 'Store Settings' }}
+      />
+      <Stack.Screen
+        name='PreviousPurchasesScreen'
+        component={PreviousPurchasesScreen}
+        options={{ title: 'Previous Purchases' }}
       />
       <Stack.Screen
         name='StoreSettingsEdit'
