@@ -2,7 +2,37 @@
 
 FOODMAX - WASTEMIN: Food loss/waste prevention and Donation Platform
 
-PROJECT WEBSITE: https://foodmaxwastemin.wordpress.com/
+## Project Website
+
+https://foodmaxwastemin.wordpress.com/
+
+## Running the app
+
+### Prerequisites
+
+- Git
+- node.js and npm
+- Android Studio and Android SDK
+
+### Setup
+
+1. Clone this repository to your local computer
+
+```
+git clone https://github.com/CankayaUniversity/ceng-407-408-2023-2024-FOODMAX-WASTEMIN-Food-loss-waste-prevention-and-Donation-Platform.git
+```
+
+2. Install all the dependencies
+
+```
+npm install
+```
+
+3. To run the app run this command and then when it is started press 'a' for run the android emulator
+
+```
+npm start
+```
 
 ## Running the Flask Server
 
