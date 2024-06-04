@@ -1,5 +1,7 @@
+// Recommendation2.js
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, ScrollView, StyleSheet, Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Recommendation2() {
   const [allergyWarning, setAllergyWarning] = useState('');
@@ -8,16 +10,17 @@ export default function Recommendation2() {
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('');
   const [recommendations, setRecommendations] = useState(null);
+  const navigation = useNavigation();
   // USE your IP address 
   // Port number: 5000
   const handleRecommend = async () => {
     try {
-      const response = await fetch(`http://192.168.1.4:5000/recommendations?PostAllergyWarning=${allergyWarning}&PostFoodProvider=${foodProvider}&PostDescription=${description}&PostPrice=${price}&PostQuantity=${quantity}`);
-      const responseText = await response.text(); 
+      const response = await fetch(`http://192.168.1.5:5000/recommendations?PostAllergyWarning=${allergyWarning}&PostFoodProvider=${foodProvider}&PostDescription=${description}&PostPrice=${price}&PostQuantity=${quantity}`);
+      const responseText = await response.text();
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      const data = JSON.parse(responseText); 
+      const data = JSON.parse(responseText);
       setRecommendations(data.recommendations);
     } catch (error) {
       console.error('Network request failed:', error);
@@ -43,12 +46,12 @@ export default function Recommendation2() {
                 {item.PostPhotos && Array.isArray(item.PostPhotos) && item.PostPhotos.length > 0 ? (
                   <View style={styles.photosContainer}>
                     {item.PostPhotos.map((photo, index) => {
-                      const imagePath = photo.replace(/\//g, '%2F'); 
+                      const imagePath = photo.replace(/\//g, '%2F');
                       const fullURL = `${baseURL}${imagePath}?alt=media`;
                       return (
-                        <Image 
-                          key={index} 
-                          source={{ uri: fullURL }} 
+                        <Image
+                          key={index}
+                          source={{ uri: fullURL }}
                           style={styles.photo}
                           onError={(e) => console.error('Image loading error:', e.nativeEvent.error)}
                         />
@@ -61,7 +64,16 @@ export default function Recommendation2() {
                 <Text style={styles.featureText}><Text style={styles.boldText}>Price:</Text> {item.PostPrice} $</Text>
                 <Text style={styles.featureText}><Text style={styles.boldText}>Quantity:</Text> {item.PostQuantity}</Text>
                 <View style={styles.buyButtonContainer}>
-                  <Button title='Buy' onPress={() => console.log('Buy button pressed')} color="#1c8aff"/>
+                  <Button
+                    title='Buy'
+                    onPress={() => navigation.navigate('Buy', {
+                      postId: item.PostId,
+                      storeName: item.PostFoodProvider,
+                      storeAddress: item.PostAddress,
+                    
+                    })}
+                    color="#1c8aff"
+                  />
                 </View>
               </View>
             );
