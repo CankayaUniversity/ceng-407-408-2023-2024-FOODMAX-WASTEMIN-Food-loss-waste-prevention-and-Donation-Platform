@@ -102,7 +102,7 @@ function Home({ navigation }) {
         />
         <Button
           onPress={() => navigation.navigate('Recommendation')}
-          title='Recommend It For You'
+          title='Recommended For You'
         />
       </View>
     </ScrollView>

@@ -83,7 +83,7 @@ function InsideStack() {
       <Stack.Screen
         name='Recommendation'
         component={Recommendation}
-        options={{ title: 'Recommendation It For You' }}
+        options={{ title: 'Recommendation For You' }}
       />
     </Stack.Navigator>
   );

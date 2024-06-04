@@ -26,7 +26,7 @@ export default function Recommendation2() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Button title="RECOMMEND IT FOR YOU" onPress={handleRecommend} color="#1c8aff"/>
+      <Button title="RECOMMENDED FOR YOU" onPress={handleRecommend} color="#1c8aff"/>
       {recommendations && (
         <View style={styles.resultContainer}>
           <Text style={styles.resultTitle}>Recommended Meals</Text>
