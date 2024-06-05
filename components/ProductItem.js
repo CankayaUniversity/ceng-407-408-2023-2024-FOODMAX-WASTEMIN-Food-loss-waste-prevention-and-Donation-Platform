@@ -2,19 +2,56 @@ import { View, Text, StyleSheet, Image, Button, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Colors from '../constants/colors';
 import { useNavigation } from '@react-navigation/native';
-import { collection, addDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../FirebaseConfig';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Import the FontAwesome icon set
 
 const ProductItem = ({ product }) => {
   const [imageURL, setImageURL] = useState(product.imageUrl);
+  const [avgRating, setAvgRating] = useState(0);
+  const [ratingCount, setRatingCount] = useState(0);
   const navigation = useNavigation();
 
   useEffect(() => {
-    if (product && product.imageUrl) {
-      setImageURL(product.imageUrl);
-    } else {
-      console.log('No valid imageUrl found in product:', product);
-    }
+    const fetchRatings = async () => {
+      if (product && product.imageUrl) {
+        setImageURL(product.imageUrl);
+      } else {
+        console.log('No valid imageUrl found in product:', product);
+      }
+
+      if (product && product.id) {
+        try {
+          const productDocRef = doc(FIREBASE_FIRESTORE, 'FoodPost', product.id);
+          const productDoc = await getDoc(productDocRef);
+          
+          if (productDoc.exists()) {
+            const productData = productDoc.data();
+            const ratings = productData.ratings || [];
+            console.log('Product ratings:', ratings);
+
+            if (Array.isArray(ratings) && ratings.length > 0) {
+              const totalRatings = ratings.length;
+              const sumRatings = ratings.reduce((sum, rate) => {
+                const numericRate = parseFloat(rate);
+                return sum + (isNaN(numericRate) ? 0 : numericRate);
+              }, 0);
+              setAvgRating((sumRatings / totalRatings).toFixed(1));
+              setRatingCount(totalRatings);
+            } else {
+              setAvgRating(0);
+              setRatingCount(0);
+            }
+          } else {
+            console.log('No product document found');
+          }
+        } catch (error) {
+          console.error('Error fetching product ratings:', error);
+        }
+      }
+    };
+
+    fetchRatings();
   }, [product]);
 
   const currentUser = FIREBASE_AUTH.currentUser;
@@ -37,7 +74,6 @@ const ProductItem = ({ product }) => {
 
   const handleBuy = async () => {
     try {
-      
       navigation.navigate('Buy', { postId: product.id });
     } catch (error) {
       console.error('Error placing order:', error);
@@ -56,6 +92,12 @@ const ProductItem = ({ product }) => {
         <Text style={styles.titleText}>{product.PostTitle}</Text>
         <Text style={styles.priceText}>${product.PostPrice}</Text>
         <Text style={styles.descriptionText}>{product.PostDescription}</Text>
+        <View style={styles.ratingContainer}>
+          <Icon name="star" size={16} color={Colors.yellow} />
+          <Text style={styles.ratingText}>
+            {avgRating} ({ratingCount})
+          </Text>
+        </View>
         {isCurrentUserMatched() ? (
           <Button
             onPress={() =>
@@ -107,5 +149,14 @@ const styles = StyleSheet.create({
   priceText: {
     fontWeight: 'bold',
     color: Colors.green,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ratingText: {
+    fontSize: 12,
+    color: Colors.orange,
+    marginLeft: 4,
   },
 });
