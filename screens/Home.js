@@ -1,10 +1,9 @@
 import { View, StyleSheet, ScrollView, Button } from 'react-native';
 import { useState, useEffect, useContext } from 'react';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FIREBASE_FIRESTORE } from '../FirebaseConfig';
 import CategoryList from '../components/CategoryList';
-import GlobalApi from '../src/services/GlobalApi';
 import PlaceList from '../components/PlaceList';
 import { UserLocationContext } from '../src/context/UserLocationContext';
 import { SIZES } from '../constants/sizes';
@@ -21,19 +20,22 @@ function Home({ navigation }) {
     longitudeDelta: 0.0421,
   };
 
-  const GetNearBySearchPlace = (value) => {
+  const GetNearBySearchPlace = async (value) => {
     if (location) {
-      GlobalApi.nearByPlace(
-        location.coords.latitude,
-        location.coords.longitude,
-        value
-      )
-        .then((resp) => {
-          setPlaceList(resp.data.results);
-        })
-        .catch((error) => {
-          console.error('Error fetching nearby places:', error);
-        });
+      try {
+        const q = query(
+          collection(FIREBASE_FIRESTORE, 'Store'),
+          where('category', '==', value)
+        );
+        const querySnapshot = await getDocs(q);
+        const fetchedData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setPlaceList(fetchedData);
+      } catch (error) {
+        console.error('Error fetching nearby places:', error);
+      }
     }
   };
 
@@ -59,8 +61,6 @@ function Home({ navigation }) {
       setFoodPosts(data); // Update foodPosts state
     });
   }, [location]);
-
-  useEffect(() => {}, [foodPosts]);
 
   return (
     <ScrollView style={styles.container}>
@@ -92,9 +92,8 @@ function Home({ navigation }) {
       <CategoryList
         setSelectedCategory={(value) => GetNearBySearchPlace(value)}
       />
-      {/* {placeList && <PlaceList placeList={placeList} />} */}
-      {/* put these temporarily here */}
-      <StoreList />
+      <PlaceList placeList={placeList} />
+      {/* <StoreList /> */}
       <View style={styles.button}>
         <Button
           onPress={() => navigation.navigate('FoodPostList')}

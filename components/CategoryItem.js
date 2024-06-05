@@ -1,16 +1,16 @@
 import { View, Text, Image, StyleSheet } from 'react-native';
 import React from 'react';
-import Colors from '../constants/colors';
 import { SIZES } from '../constants/sizes';
+import Colors from '../constants/colors';
 
-export default function CategoryItem({ category }) {
+const CategoryItem = ({ category }) => {
   return (
     <View style={styles.container}>
-      <Image style={styles.icon} source={category.icon} />
+      <Image source={category.icon} style={styles.icon} />
       <Text style={styles.iconLabel}>{category.name}</Text>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -29,10 +29,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   icon: {
-    width: 50,
-    height: 50,
+    width: 70,
+    height: 70,
   },
   iconLabel: {
     fontSize: 12,
   },
 });
+
+export default CategoryItem;

@@ -8,28 +8,29 @@ export default function CategoryList({ setSelectedCategory }) {
     {
       id: 1,
       name: 'Restaurant',
-      value: 'restaurant',
-      icon: require('../assets/cafe.png'),
+      value: 'Restaurant',
+      icon: require('../assets/res.png'), 
     },
     {
       id: 2,
       name: 'Cafe',
-      value: 'cafe',
-      icon: require('../assets/cafe.png'),
+      value: 'Cafe',
+      icon: require('../assets/caf.png'),
     },
     {
       id: 3,
       name: 'Supermarket',
-      value: 'supermarket',
-      icon: require('../assets/cafe.png'),
+      value: 'Supermarket',
+      icon: require('../assets/sup.png'),
     },
   ];
+
   return (
     <View style={styles.container}>
       <Text>Select Top Category</Text>
       <FlatList
         data={categoryList}
-        key={categoryList.value}
+        keyExtractor={(item) => item.id.toString()}
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         renderItem={({ item }) => (
