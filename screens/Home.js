@@ -13,16 +13,18 @@ function Home({ navigation }) {
   const [placeList, setPlaceList] = useState([]);
   const [foodPosts, setFoodPosts] = useState([]);
   const { location, setLocation } = useContext(UserLocationContext);
-  const mapRegion = {
+
+  const mapRegion = location ? {
     latitude: location.coords.latitude,
     longitude: location.coords.longitude,
     latitudeDelta: 0.0322,
     longitudeDelta: 0.0421,
-  };
+  } : null;
 
   const GetNearBySearchPlace = async (value) => {
     if (location) {
       try {
+        
         const q = query(
           collection(FIREBASE_FIRESTORE, 'Store'),
           where('category', '==', value)
@@ -32,6 +34,7 @@ function Home({ navigation }) {
           id: doc.id,
           ...doc.data(),
         }));
+        
         setPlaceList(fetchedData);
       } catch (error) {
         console.error('Error fetching nearby places:', error);
@@ -48,24 +51,30 @@ function Home({ navigation }) {
         id: doc.id,
         ...doc.data(),
       }));
+      
       return fetchedData;
     } catch (error) {
       console.error('Error fetching food posts:', error);
-      return []; // Return an empty array if an error occurs
+      return []; 
     }
   };
 
   useEffect(() => {
-    GetNearBySearchPlace('restaurant');
-    fetchFoodPosts().then((data) => {
-      setFoodPosts(data); // Update foodPosts state
-    });
+    if (location) {
+      console.log('Location available:', location);
+      GetNearBySearchPlace('restaurant'); 
+      fetchFoodPosts().then((data) => {
+        setFoodPosts(data); 
+      });
+    } else {
+      console.log('Location not available yet');
+    }
   }, [location]);
 
   return (
     <ScrollView style={styles.container}>
       <View>
-        {location && (
+        {location && mapRegion && (
           <MapView
             style={styles.map}
             provider={PROVIDER_GOOGLE}
@@ -74,7 +83,9 @@ function Home({ navigation }) {
           >
             {foodPosts.map(
               (post, index) =>
-                post.PostSelectedSpot && (
+                post.PostSelectedSpot &&
+                !isNaN(post.PostSelectedSpot.latitude) &&
+                !isNaN(post.PostSelectedSpot.longitude) && (
                   <Marker
                     key={index}
                     coordinate={{
@@ -86,11 +97,26 @@ function Home({ navigation }) {
                   />
                 )
             )}
+            {placeList.map((place, index) => (
+              place.location &&
+              !isNaN(place.location.latitude) &&
+              !isNaN(place.location.longitude) && (
+                <Marker
+                  key={index}
+                  coordinate={{
+                    latitude: parseFloat(place.location.latitude),
+                    longitude: parseFloat(place.location.longitude),
+                  }}
+                  title={place.name}
+                  pinColor='red'
+                />
+              )
+            ))}
           </MapView>
         )}
       </View>
       <CategoryList
-        setSelectedCategory={(value) => GetNearBySearchPlace(value)}
+        setSelectedCategory={(value) => GetNearBySearchPlace(value)} // Update selectedCategory state
       />
       <PlaceList placeList={placeList} />
       {/* <StoreList /> */}
