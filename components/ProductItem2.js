@@ -10,6 +10,7 @@ const ProductItem2 = ({ product }) => {
   const [imageURL, setImageURL] = useState('empty');
   const [productData, setProductData] = useState(null);
   const [isRated, setIsRated] = useState(false);
+  const [isCommented, setIsCommented] = useState(false);
   const storage = getStorage();
   const navigation = useNavigation();
   const currentUser = FIREBASE_AUTH.currentUser;
@@ -36,22 +37,23 @@ const ProductItem2 = ({ product }) => {
       }
     };
 
-    const checkIfRated = async () => {
+    const checkIfRatedOrCommented = async () => {
       try {
         const userDocRef = doc(FIREBASE_FIRESTORE, 'users', currentUser.uid);
         const userDoc = await getDoc(userDocRef);
         if (userDoc.exists()) {
           const userData = userDoc.data();
           setIsRated(userData.ratedProducts && userData.ratedProducts.includes(product));
+          setIsCommented(userData.commentedProducts && userData.commentedProducts.includes(product));
         }
       } catch (error) {
-        console.error('Error checking if product is rated:', error);
+        console.error('Error checking if product is rated or commented:', error);
       }
     };
 
     if (product) {
       fetchProductData();
-      checkIfRated();
+      checkIfRatedOrCommented();
     }
   }, [product, storage, currentUser]);
 
@@ -60,6 +62,14 @@ const ProductItem2 = ({ product }) => {
       Alert.alert('Error', 'You have already rated this product.');
     } else {
       navigation.navigate('RatingScreen', { productId: product });
+    }
+  };
+
+  const handleCommentPress = () => {
+    if (isCommented) {
+      Alert.alert('Error', 'You have already commented on this product.');
+    } else {
+      navigation.navigate('CommentScreen', { productId: product });
     }
   };
 
@@ -74,12 +84,20 @@ const ProductItem2 = ({ product }) => {
         <Text style={styles.titleText}>{productData.PostTitle}</Text>
         <Text style={styles.priceText}>${productData.PostPrice}</Text>
         <Text style={styles.descriptionText}>{productData.PostDescription}</Text>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleRatePress}
-        >
-          <Text style={styles.buttonText}>Rate</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleRatePress}
+          >
+            <Text style={styles.buttonText}>Rate</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button]}
+            onPress={handleCommentPress}
+          >
+            <Text style={styles.buttonText}>Comment</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -119,13 +137,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.green,
   },
-  button: {
+  buttonContainer: {
+    flexDirection: 'row',
     marginTop: 10,
+    gap: 10,
+  },
+  button: {
+    flex: 1,
     paddingVertical: 10,
     paddingHorizontal: 20,
     backgroundColor: Colors.navy,
     borderRadius: 5,
     alignItems: 'center',
+  },
+  commentButton: {
+    backgroundColor: Colors.orange,
   },
   buttonText: {
     color: Colors.white,

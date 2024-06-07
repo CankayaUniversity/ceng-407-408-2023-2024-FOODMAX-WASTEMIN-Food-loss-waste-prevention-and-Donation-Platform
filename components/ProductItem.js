@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, Button, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, Button, Alert, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Colors from '../constants/colors';
 import { useNavigation } from '@react-navigation/native';
@@ -10,10 +10,11 @@ const ProductItem = ({ product }) => {
   const [imageURL, setImageURL] = useState(product.imageUrl);
   const [avgRating, setAvgRating] = useState(0);
   const [ratingCount, setRatingCount] = useState(0);
+  const [commentCount, setCommentCount] = useState(0); // State to store comment count
   const navigation = useNavigation();
 
   useEffect(() => {
-    const fetchRatings = async () => {
+    const fetchProductData = async () => {
       if (product && product.imageUrl) {
         setImageURL(product.imageUrl);
       } else {
@@ -28,6 +29,7 @@ const ProductItem = ({ product }) => {
           if (productDoc.exists()) {
             const productData = productDoc.data();
             const ratings = productData.ratings || [];
+            const comments = productData.comments || [];
             console.log('Product ratings:', ratings);
 
             if (Array.isArray(ratings) && ratings.length > 0) {
@@ -42,16 +44,20 @@ const ProductItem = ({ product }) => {
               setAvgRating(0);
               setRatingCount(0);
             }
+
+            // Set the comment count
+            setCommentCount(comments.length);
+
           } else {
             console.log('No product document found');
           }
         } catch (error) {
-          console.error('Error fetching product ratings:', error);
+          console.error('Error fetching product data:', error);
         }
       }
     };
 
-    fetchRatings();
+    fetchProductData();
   }, [product]);
 
   const currentUser = FIREBASE_AUTH.currentUser;
@@ -81,6 +87,10 @@ const ProductItem = ({ product }) => {
     }
   };
 
+  const handleCommentsPress = () => {
+    navigation.navigate('CommentScreen', { productId: product.id });
+  };
+
   if (product.PostQuantity <= 0 || product.PostAvailability === 1) {
     return null;
   }
@@ -97,6 +107,10 @@ const ProductItem = ({ product }) => {
           <Text style={styles.ratingText}>
             {avgRating} ({ratingCount})
           </Text>
+          <TouchableOpacity onPress={handleCommentsPress} style={styles.commentContainer}>
+            <Icon name="comments" size={16} color={Colors.blue} />
+            <Text style={styles.commentText}>{commentCount} Comments</Text>
+          </TouchableOpacity>
         </View>
         {isCurrentUserMatched() ? (
           <Button
@@ -153,10 +167,21 @@ const styles = StyleSheet.create({
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 8,
   },
   ratingText: {
     fontSize: 12,
     color: Colors.orange,
+    marginLeft: 4,
+  },
+  commentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 16,
+  },
+  commentText: {
+    fontSize: 12,
+    color: Colors.blue,
     marginLeft: 4,
   },
 });

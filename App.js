@@ -31,6 +31,7 @@ import PreviousPurchasesScreen from './screens/PreviousPurchasesScreen';
 import Recommendation from './screens/Recommendation';
 import StoreDetails from './screens/StoreDetails';
 import RatingScreen from './screens/RatingScreen';
+import CommentScreen from './screens/CommentScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -121,6 +122,11 @@ function SettingsStack() {
         name='RatingScreen'
         component={RatingScreen}
         options={{ title: 'Rate' }}
+      />
+      <Stack.Screen
+        name='CommentScreen'
+        component={CommentScreen}
+        options={{ title: 'Comment' }}
       />
       <Stack.Screen
         name='StoreSettingsEdit'
