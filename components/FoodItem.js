@@ -37,17 +37,7 @@ const FoodItem = ({ data }) => {
 
   const handleBuy = async () => {
     try {
-      // Create a new order document
-      const orderRef = doc(db, 'Orders');
-      await setDoc(orderRef, {
-        userId: currentUser.uid,
-        postId: data.id,
-        // Add any other relevant data to the order
-      });
-
-      // You can also update the inventory or do other actions here
-
-      Alert.alert('Success', 'Order placed successfully.');
+      navigation.navigate('Buy', { postId: data.id });
     } catch (error) {
       console.error('Error placing order:', error);
       Alert.alert('Error', 'Failed to place order. Please try again later.');
@@ -72,9 +62,7 @@ const FoodItem = ({ data }) => {
           />
         ) : (
           <Button
-            onPress={() => {
-              handleBuy;
-            }}
+            onPress={handleBuy}
             title='Buy'
           />
         )}
