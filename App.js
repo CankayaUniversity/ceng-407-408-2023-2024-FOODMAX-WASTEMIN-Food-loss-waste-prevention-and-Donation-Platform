@@ -67,6 +67,11 @@ function InsideStack() {
         options={{ title: 'Store Details' }}
       />
       <Stack.Screen
+        name='CommentScreen'
+        component={CommentScreen}
+        options={{ title: 'Comment' }}
+      />
+      <Stack.Screen
         name='Buy'
         component={Buy}
         options={{ title: 'Buy' }}
