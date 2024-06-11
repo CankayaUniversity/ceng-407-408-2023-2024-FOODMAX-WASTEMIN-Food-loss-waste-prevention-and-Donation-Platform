@@ -96,3 +96,7 @@ adb devices
 ```
 adb -s emulator-5554 reverse tcp:5000 tcp:5000
 ```
+
+## Screenshots of the App
+<img src="https://github.com/CankayaUniversity/ceng-407-408-2023-2024-FOODMAX-WASTEMIN-Food-loss-waste-prevention-and-Donation-Platform/assets/62833425/dbec76a5-0a62-4069-aa40-502724df00ba" height="450">
+<img src="https://github.com/CankayaUniversity/ceng-407-408-2023-2024-FOODMAX-WASTEMIN-Food-loss-waste-prevention-and-Donation-Platform/assets/62833425/82bc93b1-2843-44c8-adf7-0eb8b1568c96" height="450">  <img src="https://github.com/CankayaUniversity/ceng-407-408-2023-2024-FOODMAX-WASTEMIN-Food-loss-waste-prevention-and-Donation-Platform/assets/62833425/bb3ba8b1-9611-48d2-b980-52a368f321d3" height="450">  <img src="https://github.com/CankayaUniversity/ceng-407-408-2023-2024-FOODMAX-WASTEMIN-Food-loss-waste-prevention-and-Donation-Platform/assets/62833425/81481b57-b32d-4ce1-b520-743cbb18a807" height="450">  
